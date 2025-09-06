@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "echo Build completed",
     "preview": "vite preview",
-    "vercel-build": "vite build && echo 'Build completed successfully'"
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
