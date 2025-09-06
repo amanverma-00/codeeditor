@@ -15,6 +15,7 @@
     "@reduxjs/toolkit": "^2.8.2",
     "@tailwindcss/vite": "^4.1.7",
     "axios": "^1.9.0",
+    "codeops-backend": "file:..",
     "daisyui": "^5.0.35",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.511.0",

@@ -4,10 +4,9 @@
   "description": "CodeOps Backend - Coding Platform API",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "node src/index.js",
-    "build": "npm install",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node backend/src/index.js",
+    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "node backend/src/index.js"
   },
   "keywords": ["coding", "platform", "api", "nodejs", "express"],
   "author": "Your Name",
