@@ -6,7 +6,7 @@ import path from 'path'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
-    outDir: 'dist',
+    outDir: './dist',
     assetsDir: 'assets',
     rollupOptions: {
       output: {
@@ -22,5 +22,6 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173
-  }
+  },
+  base: './'
 })
