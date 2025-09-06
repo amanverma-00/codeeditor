@@ -1,0 +1,63 @@
+{
+  "title": "Count Vowels",
+  "description": "Count the number of vowels (a, e, i, o, u) in a string.\n\nIgnore case.",
+  "difficulty": "hard",
+  "tags": "string",
+  "visibleTestCases": [
+    {
+      "input": "\"hello\"",
+      "output": "2",
+      "explanation": "e and o are vowels"
+    },
+    {
+      "input": "\"ChatGPT\"",
+      "output": "1",
+      "explanation": "only a is a vowel"
+    }
+  ],
+  "hiddenTestCases": [
+    {
+      "input": "\"aeiou\"",
+      "output": "5",
+      "explanation": "all vowels"
+    },
+    {
+      "input": "\"xyz\"",
+      "output": "0",
+      "explanation": "no vowels"
+    },
+    {
+      "input": "\"Programming\"",
+      "output": "3",
+      "explanation": "o, a, i are vowels"
+    }
+  ],
+  "startCode": [
+    {
+      "language": "JavaScript",
+      "initialCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const s = input[0].replace(/\"/g, '');\n  \n  function countVowels(s) {\n    // TODO: Count vowels in string\n    return 0;\n  }\n  \n  console.log(countVowels(s));\n});"
+    },
+    {
+      "language": "Java",
+      "initialCode": "public static int countVowels(String s) {\n    // TODO: Count vowels in string\n    return 0;\n}"
+    },
+    {
+      "language": "C++",
+      "initialCode": "int countVowels(string s) {\n    // TODO: Count vowels in string\n    return 0;\n}"
+    }
+  ],
+  "referenceSolution": [
+    {
+      "language": "JavaScript",
+      "completeCode": "function countVowels(s) {\n    let count = 0;\n    s = s.toLowerCase();\n    for (let c of s) {\n        if (\"aeiou\".includes(c)) count++;\n    }\n    return count;\n}"
+    },
+    {
+      "language": "Java",
+      "completeCode": "public static int countVowels(String s) {\n    int count = 0;\n    s = s.toLowerCase();\n    for (char c : s.toCharArray()) {\n        if (\"aeiou\".indexOf(c) != -1) count++;\n    }\n    return count;\n}"
+    },
+    {
+      "language": "C++",
+      "completeCode": "int countVowels(string s) {\n    int count = 0;\n    for (char c : s) {\n        c = tolower(c);\n        if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') count++;\n    }\n    return count;\n}"
+    }
+  ]
+}

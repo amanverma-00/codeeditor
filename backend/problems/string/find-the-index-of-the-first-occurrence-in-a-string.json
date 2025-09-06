@@ -1,0 +1,28 @@
+{
+    "title": "Find the Index of the First Occurrence in a String",
+    "description": "Given two strings haystack and needle, return the index of the first occurrence of needle in haystack, or -1 if needle is not part of haystack. If needle is an empty string, return 0 (consistent with C's strstr() and Java's indexOf()).",
+    "difficulty": "easy",
+    "tags": "string",
+    "visibleTestCases": [
+      {
+        "input": "haystack = \"hello\", needle = \"ll\"",
+        "output": "2",
+        "explanation": "The substring \"ll\" first occurs starting at index 2."
+      }
+    ],
+    "hiddenTestCases": [
+      { "input": "haystack = \"aaaaa\", needle = \"bba\"", "output": "-1" },
+      { "input": "haystack = \"\", needle = \"\"", "output": "0" },
+      { "input": "haystack = \"abc\", needle = \"\"", "output": "0" }
+    ],
+    "startCode": [
+      { "language": "JavaScript", "initialCode": "function solve(haystack, needle) {\n    // TODO: Implement your solution\n    return -1;\n}\nconsole.log(solve(\"hello\", \"ll\"));" },
+      { "language": "Java", "initialCode": "class Solution {\n    public int solve(String haystack, String needle) {\n        // TODO: Implement your solution\n        return -1;\n    }\n    public static void main(String[] args) {\n        Solution sol = new Solution();\n        System.out.println(sol.solve(\"hello\", \"ll\"));\n    }\n}" },
+      { "language": "C++", "initialCode": "#include <bits/stdc++.h>\nusing namespace std;\nint solve(const string& haystack, const string& needle) {\n    // TODO: Implement your solution\n    return -1;\n}\nint main() {\n    cout << solve(\"hello\", \"ll\");\n    return 0;\n}" }
+    ],
+    "referenceSolution": [
+      { "language": "JavaScript", "completeCode": "function solve(haystack, needle) {\n    if (needle === \"\") return 0;\n    return haystack.indexOf(needle);\n}" },
+      { "language": "Java", "completeCode": "class Solution {\n    public int solve(String haystack, String needle) {\n        if (needle.isEmpty()) return 0;\n        return haystack.indexOf(needle);\n    }\n}" },
+      { "language": "C++", "completeCode": "#include <bits/stdc++.h>\nusing namespace std;\nint solve(const string& haystack, const string& needle) {\n    if (needle.empty()) return 0;\n    auto pos = haystack.find(needle);\n    return (pos == string::npos) ? -1 : (int)pos;\n}" }
+    ]
+}

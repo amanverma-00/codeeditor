@@ -1,0 +1,60 @@
+{
+  "title": "Remove Duplicates",
+  "description": "Given an array of integers, remove duplicate elements and return the array with only unique elements in sorted order.\n\nImplement an efficient solution.",
+  "difficulty": "medium",
+  "tags": "array",
+  "visibleTestCases": [
+    {
+      "input": "6\n1 2 2 3 4 4",
+      "output": "1 2 3 4",
+      "explanation": "Duplicates (2 and 4) are removed, unique sorted array is [1,2,3,4]."
+    },
+    {
+      "input": "5\n5 5 5 5 5",
+      "output": "5",
+      "explanation": "All elements are duplicates, only one '5' remains."
+    }
+  ],
+  "hiddenTestCases": [
+    {
+      "input": "7\n10 20 10 30 20 40 50",
+      "output": "10 20 30 40 50"
+    },
+    {
+      "input": "4\n9 8 7 9",
+      "output": "7 8 9"
+    },
+    {
+      "input": "1\n42",
+      "output": "42"
+    }
+  ],
+  "startCode": [
+    {
+      "language": "JavaScript",
+      "initialCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const n = parseInt(input[0]);\n  const arr = input[1].split(' ').map(Number);\n  \n  function removeDuplicates(arr) {\n    // TODO: Remove duplicates and return sorted unique array\n    return [];\n  }\n  \n  console.log(removeDuplicates(arr).join(' '));\n});"
+    },
+    {
+      "language": "Java",
+      "initialCode": "import java.util.*;\n\npublic class Main {\n    public static List<Integer> removeDuplicates(int[] arr) {\n        // TODO: Remove duplicates and return sorted unique list\n        return new ArrayList<>();\n    }\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] arr = new int[n];\n        for (int i = 0; i < n; i++) arr[i] = sc.nextInt();\n        List<Integer> res = removeDuplicates(arr);\n        for (int x : res) System.out.print(x + \" \");\n    }\n}"
+    },
+    {
+      "language": "C++",
+      "initialCode": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<int> removeDuplicates(vector<int>& arr) {\n    // TODO: Remove duplicates and return sorted unique array\n    return {};\n}\n\nint main() {\n    int n;\n    cin >> n;\n    vector<int> arr(n);\n    for (int i = 0; i < n; i++) cin >> arr[i];\n    vector<int> res = removeDuplicates(arr);\n    for (int x : res) cout << x << \" \";\n    return 0;\n}"
+    }
+  ],
+  "referenceSolution": [
+    {
+      "language": "JavaScript",
+      "completeCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const n = parseInt(input[0]);\n  const arr = input[1].split(' ').map(Number);\n  \n  function removeDuplicates(arr) {\n    const unique = Array.from(new Set(arr));\n    unique.sort((a, b) => a - b);\n    return unique;\n  }\n  \n  console.log(removeDuplicates(arr).join(' '));\n});"
+    },
+    {
+      "language": "Java",
+      "completeCode": "import java.util.*;\n\npublic class Main {\n    public static List<Integer> removeDuplicates(int[] arr) {\n        Set<Integer> set = new TreeSet<>();\n        for (int num : arr) set.add(num);\n        return new ArrayList<>(set);\n    }\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] arr = new int[n];\n        for (int i = 0; i < n; i++) arr[i] = sc.nextInt();\n        List<Integer> res = removeDuplicates(arr);\n        for (int x : res) System.out.print(x + \" \");\n    }\n}"
+    },
+    {
+      "language": "C++",
+      "completeCode": "#include <bits/stdc++.h>\nusing namespace std;\n\nvector<int> removeDuplicates(vector<int>& arr) {\n    set<int> s(arr.begin(), arr.end());\n    vector<int> res(s.begin(), s.end());\n    return res;\n}\n\nint main() {\n    int n;\n    cin >> n;\n    vector<int> arr(n);\n    for (int i = 0; i < n; i++) cin >> arr[i];\n    vector<int> res = removeDuplicates(arr);\n    for (int x : res) cout << x << \" \";\n    return 0;\n}"
+    }
+  ]
+}

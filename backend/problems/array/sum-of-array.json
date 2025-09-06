@@ -1,0 +1,60 @@
+{
+  "title": "Sum of Array",
+  "description": "Calculate the sum of all elements in the array.\n\nImplement an efficient solution.",
+  "difficulty": "easy",
+  "tags": "array",
+  "visibleTestCases": [
+    {
+      "input": "5\n1 2 3 4 5",
+      "output": "15",
+      "explanation": "1 + 2 + 3 + 4 + 5 = 15"
+    },
+    {
+      "input": "3\n10 -5 3",
+      "output": "8",
+      "explanation": "10 + (-5) + 3 = 8"
+    }
+  ],
+  "hiddenTestCases": [
+    {
+      "input": "5\n1 2 3 4 5",
+      "output": "15"
+    },
+    {
+      "input": "3\n10 -5 3",
+      "output": "8"
+    },
+    {
+      "input": "0\n",
+      "output": "0"
+    }
+  ],
+  "startCode": [
+    {
+      "language": "JavaScript",
+      "initialCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const n = parseInt(input[0]);\n  const arr = input[1].split(' ').map(Number);\n  \n  function sumArray(arr) {\n    // TODO: Calculate sum of elements\n    return 0;\n  }\n  \n  console.log(sumArray(arr));\n});"
+    },
+    {
+      "language": "Java",
+      "initialCode": "import java.util.*;\n\npublic class Main {\n    public static int sumArray(int[] arr) {\n        // TODO: Calculate sum of elements\n        return 0;\n    }\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] arr = new int[n];\n        for (int i = 0; i < n; i++) arr[i] = sc.nextInt();\n        System.out.println(sumArray(arr));\n    }\n}"
+    },
+    {
+      "language": "C++",
+      "initialCode": "#include <bits/stdc++.h>\nusing namespace std;\n\nint sumArray(vector<int>& arr) {\n    // TODO: Calculate sum of elements\n    return 0;\n}\n\nint main() {\n    int n;\n    cin >> n;\n    vector<int> arr(n);\n    for (int i = 0; i < n; i++) cin >> arr[i];\n    cout << sumArray(arr);\n    return 0;\n}"
+    }
+  ],
+  "referenceSolution": [
+    {
+      "language": "JavaScript",
+      "completeCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const n = parseInt(input[0]);\n  const arr = input[1].split(' ').map(Number);\n  \n  function sumArray(arr) {\n    return arr.reduce((a, b) => a + b, 0);\n  }\n  \n  console.log(sumArray(arr));\n});"
+    },
+    {
+      "language": "Java",
+      "completeCode": "import java.util.*;\n\npublic class Main {\n    public static int sumArray(int[] arr) {\n        int sum = 0;\n        for (int x : arr) sum += x;\n        return sum;\n    }\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] arr = new int[n];\n        for (int i = 0; i < n; i++) arr[i] = sc.nextInt();\n        System.out.println(sumArray(arr));\n    }\n}"
+    },
+    {
+      "language": "C++",
+      "completeCode": "#include <bits/stdc++.h>\nusing namespace std;\n\nint sumArray(vector<int>& arr) {\n    int sum = 0;\n    for (int x : arr) sum += x;\n    return sum;\n}\n\nint main() {\n    int n;\n    cin >> n;\n    vector<int> arr(n);\n    for (int i = 0; i < n; i++) cin >> arr[i];\n    cout << sumArray(arr);\n    return 0;\n}"
+    }
+  ]
+}

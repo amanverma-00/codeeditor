@@ -1,0 +1,56 @@
+{
+    "title": "Find the Index of the First Occurrence in a String",
+    "description": "Given two strings haystack and needle, return the index of the first occurrence of needle in haystack, or -1 if needle is not part of haystack. If needle is an empty string, return 0 (consistent with C’s strstr() and Java’s indexOf()).",
+    "difficulty": "easy",
+    "tags": "string",
+    "visibleTestCases": [
+      {
+        "input": "haystack = \"hello\", needle = \"ll\"",
+        "output": "2",
+        "explanation": "The substring \"ll\" first occurs starting at index 2."
+      }
+    ],
+    "hiddenTestCases": [
+      { "input": "haystack = \"aaaaa\", needle = \"bba\"", "output": "-1" },
+      { "input": "haystack = \"\", needle = \"\"", "output": "0" },
+      { "input": "haystack = \"abc\", needle = \"\"", "output": "0" }
+    ],
+    "startCode": [
+      { "language": "JavaScript", "initialCode": "function solve(haystack, needle) {\n    // TODO: Implement your solution\n    return -1;\n}\nconsole.log(solve(\"hello\", \"ll\"));" },
+      { "language": "Java", "initialCode": "class Solution {\n    public int solve(String haystack, String needle) {\n        // TODO: Implement your solution\n        return -1;\n    }\n    public static void main(String[] args) {\n        Solution sol = new Solution();\n        System.out.println(sol.solve(\"hello\", \"ll\"));\n    }\n}" },
+      { "language": "C++", "initialCode": "#include <bits/stdc++.h>\nusing namespace std;\nint solve(const string& haystack, const string& needle) {\n    // TODO: Implement your solution\n    return -1;\n}\nint main() {\n    cout << solve(\"hello\", \"ll\");\n    return 0;\n}" }
+    ],
+    "referenceSolution": [
+      { "language": "JavaScript", "completeCode": "function solve(haystack, needle) {\n    if (needle === \"\") return 0;\n    return haystack.indexOf(needle);\n}" },
+      { "language": "Java", "completeCode": "class Solution {\n    public int solve(String haystack, String needle) {\n        if (needle.isEmpty()) return 0;\n        return haystack.indexOf(needle);\n    }\n}" },
+      { "language": "C++", "completeCode": "#include <bits/stdc++.h>\nusing namespace std;\nint solve(const string& haystack, const string& needle) {\n    if (needle.empty()) return 0;\n    auto pos = haystack.find(needle);\n    return (pos == string::npos) ? -1 : (int)pos;\n}" }
+    ]
+  },
+  {
+    "title": "First Missing Positive",
+    "description": "Given an unsorted integer array nums, return the smallest missing positive integer. Your solution must run in O(n) time and use constant extra space.",
+    "difficulty": "hard",
+    "tags": "array",
+    "visibleTestCases": [
+      {
+        "input": "[3, 4, -1, 1]",
+        "output": "2",
+        "explanation": "1 is found, but 2 is missing. Rearrange in-place using cyclic sort."
+      }
+    ],
+    "hiddenTestCases": [
+      { "input": "[1,2,0]", "output": "3" },
+      { "input": "[7,8,9,11,12]", "output": "1" },
+      { "input": "[1]", "output": "2" }
+    ],
+    "startCode": [
+      { "language": "JavaScript", "initialCode": "function solve(nums) {\n    // TODO: Implement your solution\n    return -1;\n}\nconsole.log(solve([3,4,-1,1]));" },
+      { "language": "Java", "initialCode": "class Solution {\n    public int solve(int[] nums) {\n        // TODO: Implement your solution\n        return -1;\n    }\n}" },
+      { "language": "C++", "initialCode": "#include <bits/stdc++.h>\nusing namespace std;\nint solve(vector<int>& nums) {\n    // TODO: Implement your solution\n    return -1;\n}" }
+    ],
+    "referenceSolution": [
+      { "language": "JavaScript", "completeCode": "function solve(nums) {\n    const n = nums.length;\n    for (let i = 0; i < n; i++) {\n        while (nums[i] > 0 && nums[i] <= n && nums[nums[i]-1] !== nums[i]) {\n            [nums[i], nums[nums[i]-1]] = [nums[nums[i]-1], nums[i]];\n        }\n    }\n    for (let i = 0; i < n; i++) {\n        if (nums[i] !== i + 1) return i + 1;\n    }\n    return n + 1;\n}" },
+      { "language": "Java", "completeCode": "class Solution {\n    public int solve(int[] nums) {\n        int n = nums.length;\n        for (int i = 0; i < n; i++) {\n            while (nums[i] > 0 && nums[i] <= n && nums[nums[i] - 1] != nums[i]) {\n                int tmp = nums[nums[i] - 1];\n                nums[nums[i] - 1] = nums[i];\n                nums[i] = tmp;\n            }\n        }\n        for (int i = 0; i < n; i++) {\n            if (nums[i] != i + 1) return i + 1;\n        }\n        return n + 1;\n    }\n}" },
+      { "language": "C++", "completeCode": "#include <bits/stdc++.h>\nusing namespace std;\nint solve(vector<int>& nums) {\n    int n = nums.size();\n    for (int i = 0; i < n; ++i) {\n        while (nums[i] > 0 && nums[i] <= n && nums[nums[i]-1] != nums[i]) {\n            swap(nums[i], nums[nums[i]-1]);\n        }\n    }\n    for (int i = 0; i < n; ++i) {\n        if (nums[i] != i + 1) return i + 1;\n    }\n    return n + 1;\n}" }
+    ]
+  }

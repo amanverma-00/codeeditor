@@ -1,0 +1,58 @@
+{
+  "title": "Reverse a String",
+  "description": "Given a string, return its reverse.\n\nImplement an efficient solution.",
+  "difficulty": "easy",
+  "tags": "string",
+  "visibleTestCases": [
+    {
+      "input": "\"hello\"",
+      "output": "\"olleh\"",
+      "explanation": "Reversing 'hello' gives 'olleh'"
+    },
+    {
+      "input": "\"racecar\"",
+      "output": "\"racecar\"",
+      "explanation": "Palindrome remains the same when reversed"
+    }
+  ],
+  "hiddenTestCases": [
+    {
+      "input": "\"abc\"",
+      "output": "\"cba\"",
+      "explanation": "Reversing 'abc' gives 'cba'"
+    },
+    {
+      "input": "\"a\"",
+      "output": "\"a\"",
+      "explanation": "Single character string remains the same"
+    }
+  ],
+  "startCode": [
+    {
+      "language": "JavaScript",
+      "initialCode": "function reverseString(str) {\n // TODO: Reverse the string\n return \"\";\n}"
+    },
+    {
+      "language": "Java",
+      "initialCode": "public static String reverseString(String str) {\n // TODO: Reverse the string\n return \"\";\n}"
+    },
+    {
+      "language": "C++",
+      "initialCode": "string reverseString(string str) {\n // TODO: Reverse the string\n return \"\";\n}"
+    }
+  ],
+  "referenceSolution": [
+    {
+      "language": "JavaScript",
+      "completeCode": "function reverseString(str) {\n return str.split('').reverse().join('');\n}"
+    },
+    {
+      "language": "Java",
+      "completeCode": "public static String reverseString(String str) {\n return new StringBuilder(str).reverse().toString();\n}"
+    },
+    {
+      "language": "C++",
+      "completeCode": "string reverseString(string str) {\n reverse(str.begin(), str.end());\n return str;\n}"
+    }
+  ]
+}

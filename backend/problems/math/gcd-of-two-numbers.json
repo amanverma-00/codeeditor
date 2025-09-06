@@ -1,0 +1,58 @@
+{
+  "title": "GCD of Two Numbers",
+  "description": "Find the Greatest Common Divisor (GCD) of two numbers.\n\nImplement an efficient solution using the Euclidean algorithm.",
+  "difficulty": "easy",
+  "tags": "math",
+  "visibleTestCases": [
+    {
+      "input": "54 24",
+      "output": "6",
+      "explanation": "GCD of 54 and 24 is 6"
+    }
+  ],
+  "hiddenTestCases": [
+    {
+      "input": "10 5",
+      "output": "5",
+      "explanation": "GCD of 10 and 5 is 5"
+    },
+    {
+      "input": "7 3",
+      "output": "1",
+      "explanation": "7 and 3 are coprime"
+    },
+    {
+      "input": "48 18",
+      "output": "6",
+      "explanation": "GCD of 48 and 18 is 6"
+    }
+  ],
+  "startCode": [
+    {
+      "language": "JavaScript",
+      "initialCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const [a, b] = input[0].split(' ').map(Number);\n  \n  function gcd(a, b) {\n    // TODO: Implement GCD\n    return 1;\n  }\n  \n  console.log(gcd(a, b));\n});"
+    },
+    {
+      "language": "Java",
+      "initialCode": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        System.out.println(gcd(a, b));\n    }\n    \n    public static int gcd(int a, int b) {\n        // TODO: Implement GCD\n        return 1;\n    }\n}"
+    },
+    {
+      "language": "C++",
+      "initialCode": "#include <bits/stdc++.h>\nusing namespace std;\n\nint gcd(int a, int b) {\n    // TODO: Implement GCD\n    return 1;\n}\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << gcd(a, b) << endl;\n    return 0;\n}"
+    }
+  ],
+  "referenceSolution": [
+    {
+      "language": "JavaScript",
+      "completeCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const [a, b] = input[0].split(' ').map(Number);\n  \n  function gcd(a, b) {\n    while (b !== 0) {\n        let temp = b;\n        b = a % b;\n        a = temp;\n    }\n    return a;\n  }\n  \n  console.log(gcd(a, b));\n});"
+    },
+    {
+      "language": "Java",
+      "completeCode": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        System.out.println(gcd(a, b));\n    }\n    \n    public static int gcd(int a, int b) {\n        while (b != 0) {\n            int temp = b;\n            b = a % b;\n            a = temp;\n        }\n        return a;\n    }\n}"
+    },
+    {
+      "language": "C++",
+      "completeCode": "#include <bits/stdc++.h>\nusing namespace std;\n\nint gcd(int a, int b) {\n    while (b != 0) {\n        int temp = b;\n        b = a % b;\n        a = temp;\n    }\n    return a;\n}\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << gcd(a, b) << endl;\n    return 0;\n}"
+    }
+  ]
+}

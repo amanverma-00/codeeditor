@@ -1,0 +1,63 @@
+{
+  "title": "Count Characters",
+  "description": "Count the number of characters in a string.\n\nImplement an efficient solution.",
+  "difficulty": "easy",
+  "tags": "string",
+  "visibleTestCases": [
+    {
+      "input": "\"hello\"",
+      "output": "5",
+      "explanation": "\"hello\" has 5 characters"
+    },
+    {
+      "input": "\"OpenAI\"",
+      "output": "6",
+      "explanation": "\"OpenAI\" has 6 characters"
+    }
+  ],
+  "hiddenTestCases": [
+    {
+      "input": "\"a\"",
+      "output": "1",
+      "explanation": "single character string"
+    },
+    {
+      "input": "\"  \"",
+      "output": "2",
+      "explanation": "two spaces count as two characters"
+    },
+    {
+      "input": "\"ChatGPT\"",
+      "output": "7",
+      "explanation": "\"ChatGPT\" has 7 characters"
+    }
+  ],
+  "startCode": [
+    {
+      "language": "JavaScript",
+      "initialCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const s = input[0].replace(/\"/g, '');\n  \n  function countChars(s) {\n    // TODO: Count characters\n    return 0;\n  }\n  \n  console.log(countChars(s));\n});"
+    },
+    {
+      "language": "Java",
+      "initialCode": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().replace(\"\\\"\", \"\");\n        System.out.println(countChars(s));\n    }\n    \n    public static int countChars(String s) {\n        // TODO: Count characters\n        return 0;\n    }\n}"
+    },
+    {
+      "language": "C++",
+      "initialCode": "#include <bits/stdc++.h>\nusing namespace std;\n\nint countChars(string s) {\n    // TODO: Count characters\n    return 0;\n}\n\nint main() {\n    string s;\n    getline(cin, s);\n    // Remove quotes if present\n    if (s.front() == '\"') s = s.substr(1, s.length() - 2);\n    cout << countChars(s) << endl;\n    return 0;\n}"
+    }
+  ],
+  "referenceSolution": [
+    {
+      "language": "JavaScript",
+      "completeCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const s = input[0].replace(/\"/g, '');\n  \n  function countChars(s) {\n    return s.length;\n  }\n  \n  console.log(countChars(s));\n});"
+    },
+    {
+      "language": "Java",
+      "completeCode": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().replace(\"\\\"\", \"\");\n        System.out.println(countChars(s));\n    }\n    \n    public static int countChars(String s) {\n        return s.length();\n    }\n}"
+    },
+    {
+      "language": "C++",
+      "completeCode": "#include <bits/stdc++.h>\nusing namespace std;\n\nint countChars(string s) {\n    return s.length();\n}\n\nint main() {\n    string s;\n    getline(cin, s);\n    // Remove quotes if present\n    if (s.front() == '\"') s = s.substr(1, s.length() - 2);\n    cout << countChars(s) << endl;\n    return 0;\n}"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "title": "Find Maximum Element",
+  "description": "Given an array of integers, find the maximum element.\n\nImplement an efficient solution.",
+  "difficulty": "easy",
+  "tags": "array",
+  "visibleTestCases": [
+    {
+      "input": "5\n1 3 7 2 5",
+      "output": "7",
+      "explanation": "Array has 5 elements: 1 3 7 2 5. The maximum is 7"
+    },
+    {
+      "input": "3\n-1 -5 -2",
+      "output": "-1", 
+      "explanation": "Array has 3 elements: -1 -5 -2. The maximum is -1"
+    }
+  ],
+  "hiddenTestCases": [
+    {
+      "input": "5\n1 3 7 2 5",
+      "output": "7"
+    },
+    {
+      "input": "3\n-1 -5 -2",
+      "output": "-1"
+    },
+    {
+      "input": "1\n42",
+      "output": "42"
+    },
+    {
+      "input": "4\n1 1 1 1",
+      "output": "1"
+    },
+    {
+      "input": "4\n100 99 98 97",
+      "output": "100"
+    }
+  ],
+  "startCode": [
+    {
+      "language": "JavaScript",
+      "initialCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const n = parseInt(input[0]);\n  const arr = input[1].split(' ').map(Number);\n  \n  function findMax(arr) {\n    // TODO: Find maximum element\n    return 0;\n  }\n  \n  console.log(findMax(arr));\n});"
+    },
+    {
+      "language": "Java",
+      "initialCode": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] arr = new int[n];\n        for (int i = 0; i < n; i++) {\n            arr[i] = sc.nextInt();\n        }\n        System.out.println(findMax(arr));\n    }\n    \n    public static int findMax(int[] arr) {\n        // TODO: Find maximum element\n        return 0;\n    }\n}"
+    },
+    {
+      "language": "C++",
+      "initialCode": "#include <bits/stdc++.h>\nusing namespace std;\n\nint findMax(vector<int>& arr) {\n    // Your task: Find and return the maximum element in the array\n    // Example: For array [1, 3, 7, 2, 5], return 7\n    \n    // Step 1: Handle empty array case\n    if (arr.empty()) return 0;\n    \n    // Step 2: Initialize max with first element\n    int max = arr[0];\n    \n    // Step 3: Loop through rest of array and update max\n    for (int i = 1; i < arr.size(); i++) {\n        if (arr[i] > max) {\n            max = arr[i];\n        }\n    }\n    \n    // Step 4: Return the maximum element\n    return max;\n}\n\nint main() {\n    int n;\n    cin >> n;\n    vector<int> arr(n);\n    for (int i = 0; i < n; i++) {\n        cin >> arr[i];\n    }\n    cout << findMax(arr) << endl;\n    return 0;\n}"
+    }
+  ],
+  "referenceSolution": [
+    {
+      "language": "JavaScript",
+      "completeCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const n = parseInt(input[0]);\n  const arr = input[1].split(' ').map(Number);\n  \n  function findMax(arr) {\n    if (arr.length === 0) return 0;\n    let max = arr[0];\n    for (let i = 1; i < arr.length; i++) {\n      if (arr[i] > max) {\n        max = arr[i];\n      }\n    }\n    return max;\n  }\n  \n  console.log(findMax(arr));\n});"
+    },
+    {
+      "language": "Java",
+      "completeCode": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] arr = new int[n];\n        for (int i = 0; i < n; i++) {\n            arr[i] = sc.nextInt();\n        }\n        System.out.println(findMax(arr));\n    }\n    \n    public static int findMax(int[] arr) {\n        if (arr.length == 0) return 0;\n        int max = arr[0];\n        for (int i = 1; i < arr.length; i++) {\n            if (arr[i] > max) {\n                max = arr[i];\n            }\n        }\n        return max;\n    }\n}"
+    },
+    {
+      "language": "C++",
+      "completeCode": "#include <bits/stdc++.h>\nusing namespace std;\n\nint findMax(vector<int>& arr) {\n    if (arr.empty()) return 0;\n    int max = arr[0];\n    for (int i = 1; i < arr.size(); i++) {\n        if (arr[i] > max) {\n            max = arr[i];\n        }\n    }\n    return max;\n}\n\nint main() {\n    int n;\n    cin >> n;\n    vector<int> arr(n);\n    for (int i = 0; i < n; i++) {\n        cin >> arr[i];\n    }\n    cout << findMax(arr) << endl;\n    return 0;\n}"
+    }
+  ]
+}

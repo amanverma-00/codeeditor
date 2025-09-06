@@ -1,0 +1,63 @@
+{
+  "title": "Fibonacci Sequence",
+  "description": "Generate the nth Fibonacci number.\n\nImplement an efficient solution.",
+  "difficulty": "hard",
+  "tags": "math",
+  "visibleTestCases": [
+    {
+      "input": "7",
+      "output": "13",
+      "explanation": "The 7th Fibonacci number is 13 (0,1,1,2,3,5,8,13)"
+    },
+    {
+      "input": "0",
+      "output": "0",
+      "explanation": "The 0th Fibonacci number is 0"
+    }
+  ],
+  "hiddenTestCases": [
+    {
+      "input": "7",
+      "output": "13",
+      "explanation": "Fib(7) = 13"
+    },
+    {
+      "input": "0",
+      "output": "0",
+      "explanation": "Fib(0) = 0"
+    },
+    {
+      "input": "1",
+      "output": "1",
+      "explanation": "Fib(1) = 1"
+    }
+  ],
+  "startCode": [
+    {
+      "language": "JavaScript",
+      "initialCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const n = parseInt(input[0]);\n  \n  function fibonacci(n) {\n    // TODO: Implement nth Fibonacci\n    return 0;\n  }\n  \n  console.log(fibonacci(n));\n});"
+    },
+    {
+      "language": "Java",
+      "initialCode": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        System.out.println(fibonacci(n));\n    }\n    \n    public static int fibonacci(int n) {\n        // TODO: Implement nth Fibonacci\n        return 0;\n    }\n}"
+    },
+    {
+      "language": "C++",
+      "initialCode": "#include <bits/stdc++.h>\nusing namespace std;\n\nint fibonacci(int n) {\n    // TODO: Implement nth Fibonacci\n    return 0;\n}\n\nint main() {\n    int n;\n    cin >> n;\n    cout << fibonacci(n) << endl;\n    return 0;\n}"
+    }
+  ],
+  "referenceSolution": [
+    {
+      "language": "JavaScript",
+      "completeCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const n = parseInt(input[0]);\n  \n  function fibonacci(n) {\n    if (n === 0) return 0;\n    if (n === 1) return 1;\n    let a = 0, b = 1, c;\n    for (let i = 2; i <= n; i++) {\n        c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n  }\n  \n  console.log(fibonacci(n));\n});"
+    },
+    {
+      "language": "Java",
+      "completeCode": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        System.out.println(fibonacci(n));\n    }\n    \n    public static int fibonacci(int n) {\n        if (n == 0) return 0;\n        if (n == 1) return 1;\n        int a = 0, b = 1, c = 0;\n        for (int i = 2; i <= n; i++) {\n            c = a + b;\n            a = b;\n            b = c;\n        }\n        return b;\n    }\n}"
+    },
+    {
+      "language": "C++",
+      "completeCode": "#include <bits/stdc++.h>\nusing namespace std;\n\nint fibonacci(int n) {\n    if (n == 0) return 0;\n    if (n == 1) return 1;\n    int a = 0, b = 1, c;\n    for (int i = 2; i <= n; i++) {\n        c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}\n\nint main() {\n    int n;\n    cin >> n;\n    cout << fibonacci(n) << endl;\n    return 0;\n}"
+    }
+  ]
+}

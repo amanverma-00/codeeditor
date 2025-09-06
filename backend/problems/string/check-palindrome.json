@@ -1,0 +1,73 @@
+{
+  "title": "Check Palindrome",
+  "description": "Check if a string is a palindrome.\n\nImplement an efficient solution.",
+  "difficulty": "medium",
+  "tags": "string",
+  "visibleTestCases": [
+    {
+      "input": "\"racecar\"",
+      "output": "true",
+      "explanation": "reads the same forwards and backwards"
+    },
+    {
+      "input": "\"hello\"",
+      "output": "false",
+      "explanation": "not the same when reversed"
+    }
+  ],
+  "hiddenTestCases": [
+    {
+      "input": "\"racecar\"",
+      "output": "true",
+      "explanation": "reads the same forwards and backwards"
+    },
+    {
+      "input": "\"hello\"",
+      "output": "false",
+      "explanation": "not the same when reversed"
+    },
+    {
+      "input": "\"A man a plan a canal Panama\"",
+      "output": "true",
+      "explanation": "palindrome ignoring spaces and case"
+    },
+    {
+      "input": "\"race a car\"",
+      "output": "false",
+      "explanation": "not a palindrome"
+    },
+    {
+      "input": "\"Madam\"",
+      "output": "true",
+      "explanation": "palindrome ignoring case"
+    }
+  ],
+  "startCode": [
+    {
+      "language": "JavaScript",
+      "initialCode": "function isPalindrome(s) {\n    // TODO: Check if string is palindrome\n    return false;\n}"
+    },
+    {
+      "language": "Java",
+      "initialCode": "public static boolean isPalindrome(String s) {\n    // TODO: Check if string is palindrome\n    return false;\n}"
+    },
+    {
+      "language": "C++",
+      "initialCode": "bool isPalindrome(string s) {\n    // TODO: Check if string is palindrome\n    return false;\n}"
+    }
+  ],
+  "referenceSolution": [
+    {
+      "language": "JavaScript",
+      "completeCode": "function isPalindrome(s) {\n    s = s.toLowerCase().replace(/[^a-z0-9]/g, '');\n    let left = 0, right = s.length - 1;\n    \n    while (left < right) {\n        if (s[left] !== s[right]) {\n            return false;\n        }\n        left++;\n        right--;\n    }\n    return true;\n}"
+    },
+    {
+      "language": "Java",
+      "completeCode": "public static boolean isPalindrome(String s) {\n    s = s.toLowerCase().replaceAll(\"[^a-z0-9]\", \"\");\n    int left = 0, right = s.length() - 1;\n    \n    while (left < right) {\n        if (s.charAt(left) != s.charAt(right)) {\n            return false;\n        }\n        left++;\n        right--;\n    }\n    return true;\n}"
+    },
+    {
+      "language": "C++",
+      "completeCode": "bool isPalindrome(string s) {\n    string cleaned = \"\";\n    for (char c : s) {\n        if (isalnum(c)) {\n            cleaned += tolower(c);\n        }\n    }\n    \n    int left = 0, right = cleaned.length() - 1;\n    while (left < right) {\n        if (cleaned[left] != cleaned[right]) {\n            return false;\n        }\n        left++;\n        right--;\n    }\n    return true;\n}"
+    }
+  ]
+}

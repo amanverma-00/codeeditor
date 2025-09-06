@@ -1,0 +1,63 @@
+{
+  "title": "Calculate Factorial",
+  "description": "Calculate the factorial of a number.\n\nImplement an efficient solution.",
+  "difficulty": "medium",
+  "tags": "math",
+  "visibleTestCases": [
+    {
+      "input": "5",
+      "output": "120",
+      "explanation": "5! = 5 × 4 × 3 × 2 × 1 = 120"
+    },
+    {
+      "input": "0",
+      "output": "1",
+      "explanation": "0! is defined as 1"
+    }
+  ],
+  "hiddenTestCases": [
+    {
+      "input": "5",
+      "output": "120",
+      "explanation": "5! = 120"
+    },
+    {
+      "input": "0",
+      "output": "1",
+      "explanation": "0! = 1"
+    },
+    {
+      "input": "1",
+      "output": "1",
+      "explanation": "1! = 1"
+    }
+  ],
+  "startCode": [
+    {
+      "language": "JavaScript",
+      "initialCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const n = parseInt(input[0]);\n  \n  function factorial(n) {\n    // TODO: Implement factorial\n    return 1;\n  }\n  \n  console.log(factorial(n));\n});"
+    },
+    {
+      "language": "Java",
+      "initialCode": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        System.out.println(factorial(n));\n    }\n    \n    public static int factorial(int n) {\n        // TODO: Implement factorial\n        return 1;\n    }\n}"
+    },
+    {
+      "language": "C++",
+      "initialCode": "#include <bits/stdc++.h>\nusing namespace std;\n\nint factorial(int n) {\n    // TODO: Implement factorial\n    return 1;\n}\n\nint main() {\n    int n;\n    cin >> n;\n    cout << factorial(n) << endl;\n    return 0;\n}"
+    }
+  ],
+  "referenceSolution": [
+    {
+      "language": "JavaScript",
+      "completeCode": "const readline = require('readline');\nconst rl = readline.createInterface({\n  input: process.stdin,\n  output: process.stdout,\n  terminal: false\n});\n\nlet input = [];\nrl.on('line', function (line) {\n  input.push(line);\n});\n\nrl.on('close', function () {\n  const n = parseInt(input[0]);\n  \n  function factorial(n) {\n    if (n === 0) return 1;\n    let res = 1;\n    for (let i = 1; i <= n; i++) res *= i;\n    return res;\n  }\n  \n  console.log(factorial(n));\n});"
+    },
+    {
+      "language": "Java",
+      "completeCode": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        System.out.println(factorial(n));\n    }\n    \n    public static int factorial(int n) {\n        if (n == 0) return 1;\n        int res = 1;\n        for (int i = 1; i <= n; i++) res *= i;\n        return res;\n    }\n}"
+    },
+    {
+      "language": "C++",
+      "completeCode": "#include <bits/stdc++.h>\nusing namespace std;\n\nint factorial(int n) {\n    if (n == 0) return 1;\n    int res = 1;\n    for (int i = 1; i <= n; i++) res *= i;\n    return res;\n}\n\nint main() {\n    int n;\n    cin >> n;\n    cout << factorial(n) << endl;\n    return 0;\n}"
+    }
+  ]
+}
