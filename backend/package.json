@@ -1,17 +1,21 @@
 {
-  "name": "day01",
+  "name": "codeops-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "CodeOps Backend - Coding Platform API",
+  "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "dev": "node src/index.js",
+    "build": "npm install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["coding", "platform", "api", "nodejs", "express"],
+  "author": "Your Name",
+  "license": "MIT",
   "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@google/genai": "^1.3.0",
     "axios": "^1.9.0",
