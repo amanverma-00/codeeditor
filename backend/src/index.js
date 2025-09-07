@@ -37,34 +37,26 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cookieParser());
 
-// Add a default route to handle the root URL
-app.get('/', (req, res) => {
-    res.status(200).json({ 
-        message: 'CodeOps Backend Server is running!', 
-        status: 'ok',
-        timestamp: new Date().toISOString()
-    });
-});
+// Serve static files from the frontend dist folder
+app.use(express.static(path.join(__dirname, '../../frontend/dist')));
 
-app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'ok' });
-});
-
+// API routes
 app.use('/user', authRouter);
 app.use('/problem', problemRouter);
 app.use('/submission', submitRouter);
 app.use('/ai', aiRouter);
 app.use("/video", videoRouter);
 
-// Serve static files from the frontend dist folder in production
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../../frontend/dist')));
-    
-    // Handle React routing, return all requests to React app
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
-    });
-}
+// API endpoints
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
+
+// Handle React routing, return all requests to React app
+// This should be the last route to catch all unmatched requests
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
+});
 
 const initializeServer = async () => {
     try {
