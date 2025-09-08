@@ -20,7 +20,6 @@ async function connectDB() {
         
         console.log(`MongoDB Connected: ${conn.connection.host}`);
         console.log(`Database Name: ${conn.connection.name}`);
-        
         return conn;
 
     } catch (error) {
