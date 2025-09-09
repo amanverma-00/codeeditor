@@ -24,13 +24,28 @@ const allowedOrigins = [
   'http://localhost:5175',
   'http://localhost:5176',
   process.env.FRONTEND_URL,
+  'https://codeeditor-seven-delta.vercel.app', // Your Vercel deployment
 ].filter(Boolean)
 
 app.use(
   cors({
     origin:
       process.env.NODE_ENV === 'production'
-        ? [process.env.FRONTEND_URL].filter(Boolean)
+        ? (origin, callback) => {
+            // Allow requests with no origin (mobile apps, etc.)
+            if (!origin) return callback(null, true)
+
+            // Check if origin is in allowed list or is a Vercel preview deployment
+            if (
+              allowedOrigins.includes(origin) ||
+              origin.includes('vercel.app') ||
+              origin.includes('codeeditor')
+            ) {
+              return callback(null, true)
+            }
+
+            return callback(new Error('Not allowed by CORS'))
+          }
         : allowedOrigins,
     credentials: true,
   })
