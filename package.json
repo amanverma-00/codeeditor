@@ -1,32 +1,28 @@
 {
-  "name": "codeops-backend",
+  "name": "codeeditor-monorepo",
   "version": "1.0.0",
-  "description": "CodeOps Backend - Coding Platform API",
-  "main": "src/index.js",
+  "description": "CodeOps - Full Stack Coding Platform",
+  "private": true,
   "scripts": {
-    "dev": "node backend/src/index.js",
-    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
-    "start": "node backend/src/index.js"
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "start:backend": "cd backend && npm start"
   },
-  "keywords": ["coding", "platform", "api", "nodejs", "express"],
+  "keywords": [
+    "coding",
+    "platform",
+    "api",
+    "nodejs",
+    "express",
+    "react"
+  ],
   "author": "Your Name",
   "license": "MIT",
-  "type": "commonjs",
   "engines": {
     "node": ">=18.0.0"
-  },
-  "dependencies": {
-    "@google/genai": "^1.3.0",
-    "axios": "^1.9.0",
-    "bcrypt": "^5.1.1",
-    "cloudinary": "^2.6.1",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
-    "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.14.0",
-    "redis": "^5.0.0",
-    "validator": "^13.15.0"
   }
 }
