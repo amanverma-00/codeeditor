@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your OTP Code</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(180deg); }
+        }
+        
+        .header h1 {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .header .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content {
+            padding: 50px 40px;
+            background: #ffffff;
+        }
+        
+        .greeting {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .message {
+            font-size: 16px;
+            color: #4a5568;
+            margin-bottom: 35px;
+            line-height: 1.8;
+        }
+        
+        .otp-container {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border: 2px dashed #667eea;
+            border-radius: 16px;
+            padding: 35px;
+            text-align: center;
+            margin: 35px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .otp-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(102, 126, 234, 0.05) 50%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .otp-label {
+            font-size: 14px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .otp-code {
+            font-size: 48px;
+            font-weight: 700;
+            color: #667eea;
+            letter-spacing: 12px;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+            margin: 10px 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .expiry {
+            display: inline-block;
+            background: #fed7d7;
+            color: #c53030;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 15px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .expiry::before {
+            content: '⏰';
+            margin-right: 6px;
+        }
+        
+        .security-notice {
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            border-left: 4px solid #fc8181;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .security-notice h3 {
+            color: #c53030;
+            font-size: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .security-notice h3::before {
+            content: '🔒';
+            margin-right: 8px;
+            font-size: 20px;
+        }
+        
+        .security-notice p {
+            color: #742a2a;
+            font-size: 14px;
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        .footer {
+            background: #f7fafc;
+            padding: 30px 40px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .footer p {
+            color: #718096;
+            font-size: 14px;
+            margin: 8px 0;
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .footer a:hover {
+            color: #764ba2;
+        }
+        
+        .social-links {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            width: 36px;
+            height: 36px;
+            line-height: 36px;
+            background: #667eea;
+            color: #ffffff;
+            border-radius: 50%;
+            margin: 0 6px;
+            text-decoration: none;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            transform: translateY(-3px);
+            background: #764ba2;
+        }
+        
+        @media only screen and (max-width: 600px) {
+            body {
+                padding: 20px 10px;
+            }
+            
+            .content {
+                padding: 30px 25px;
+            }
+            
+            .otp-code {
+                font-size: 36px;
+                letter-spacing: 8px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .greeting {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">🔐</div>
+            <h1>Verification Code</h1>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">Hi {{name}}! 👋</div>
+            
+            <div class="message">
+                We received a request to verify your email address. Use the verification code below to complete your authentication:
+            </div>
+            
+            <div class="otp-container">
+                <div class="otp-label">Your Verification Code</div>
+                <div class="otp-code">{{otp}}</div>
+                <div class="expiry">Expires in {{expiryMinutes}} minutes</div>
+            </div>
+            
+            <div class="message">
+                Enter this code in the verification form to continue. If you didn't request this code, please ignore this email or contact our support team.
+            </div>
+            
+            <div class="security-notice">
+                <h3>Security Reminder</h3>
+                <p>
+                    Never share this code with anyone. Our team will never ask for your verification code via email, phone, or any other medium. If someone is asking for this code, it's likely a phishing attempt.
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Need help? Contact us at <a href="mailto:{{supportEmail}}">{{supportEmail}}</a></p>
+            <p style="margin-top: 15px; font-size: 12px; color: #a0aec0;">
+                © 2025 InterviewPrep Pro. All rights reserved.
+            </p>
+            <p style="font-size: 12px; color: #a0aec0;">
+                This is an automated message, please do not reply to this email.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

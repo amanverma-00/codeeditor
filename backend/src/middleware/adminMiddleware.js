@@ -27,12 +27,15 @@ const adminMiddleware = async (req,res,next)=>{
             throw new Error("User Doesn't Exist");
         }
 
+        // Redis ke blockList mein persent toh nahi hai
+
         const IsBlocked = await redisClient.exists(`token:${token}`);
 
         if(IsBlocked)
             throw new Error("Invalid Token");
 
         req.result = result;
+
 
         next();
     }
@@ -41,5 +44,6 @@ const adminMiddleware = async (req,res,next)=>{
     }
 
 }
+
 
 module.exports = adminMiddleware;

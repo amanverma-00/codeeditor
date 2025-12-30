@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to InterviewPrep Pro</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .header .celebration {
+            font-size: 72px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            animation: bounce 2s ease infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .header h1 {
+            color: #ffffff;
+            font-size: 36px;
+            font-weight: 800;
+            margin: 0 0 15px 0;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 18px;
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+        }
+        
+        .content {
+            padding: 50px 45px;
+            background: #ffffff;
+        }
+        
+        .greeting {
+            font-size: 28px;
+            color: #2d3748;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+        
+        .message {
+            font-size: 17px;
+            color: #4a5568;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: flex-start;
+            padding: 25px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 16px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+        }
+        
+        .feature-icon {
+            font-size: 32px;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+        
+        .feature-content h3 {
+            color: #2d3748;
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .feature-content p {
+            color: #718096;
+            font-size: 15px;
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        .cta-section {
+            text-align: center;
+            margin: 45px 0 35px 0;
+            padding: 40px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 10s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .cta-section h2 {
+            color: #ffffff;
+            font-size: 24px;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: #ffffff;
+            color: #667eea;
+            padding: 16px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+            margin: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            background: #f7fafc;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .tips {
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 35px 0;
+        }
+        
+        .tips h3 {
+            color: #22543d;
+            font-size: 20px;
+            margin-bottom: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .tips h3::before {
+            content: '💡';
+            margin-right: 10px;
+            font-size: 28px;
+        }
+        
+        .tips ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .tips li {
+            color: #276749;
+            padding: 12px 0;
+            padding-left: 32px;
+            position: relative;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        .tips li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #38a169;
+            font-weight: 700;
+            font-size: 20px;
+        }
+        
+        .footer {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            padding: 40px 45px;
+            text-align: center;
+            color: #a0aec0;
+        }
+        
+        .footer p {
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .footer a:hover {
+            color: #a3bffa;
+        }
+        
+        .social-links {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #4a5568;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            background: #667eea;
+            color: #ffffff;
+            border-radius: 50%;
+            margin: 0 8px;
+            text-decoration: none;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            transform: translateY(-5px) scale(1.1);
+            background: #a3bffa;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        @media only screen and (max-width: 600px) {
+            body {
+                padding: 20px 10px;
+            }
+            
+            .header {
+                padding: 40px 25px;
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .content {
+                padding: 35px 25px;
+            }
+            
+            .greeting {
+                font-size: 24px;
+            }
+            
+            .feature {
+                padding: 20px;
+            }
+            
+            .btn {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="celebration">🎉</div>
+            <h1>Welcome to InterviewPrep Pro!</h1>
+            <p>Your journey to coding excellence starts here</p>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">Hey {{name}}! 🚀</div>
+            
+            <div class="message">
+                We're thrilled to have you join our community of passionate developers! You've just taken the first step towards mastering coding interviews and leveling up your programming skills.
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">💻</div>
+                    <div class="feature-content">
+                        <h3>Practice Problems</h3>
+                        <p>Access hundreds of carefully curated coding problems ranging from easy to expert level.</p>
+                    </div>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">🎥</div>
+                    <div class="feature-content">
+                        <h3>Video Solutions</h3>
+                        <p>Watch detailed video explanations for every problem to understand the optimal approach.</p>
+                    </div>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">🤖</div>
+                    <div class="feature-content">
+                        <h3>AI-Powered Help</h3>
+                        <p>Get instant help from our AI assistant when you're stuck on a problem.</p>
+                    </div>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-content">
+                        <h3>Track Progress</h3>
+                        <p>Monitor your improvement with detailed analytics and submission history.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cta-section">
+                <h2>Ready to start your journey?</h2>
+                <a href="{{dashboardUrl}}" class="btn">Explore Problems</a>
+                <a href="{{loginUrl}}" class="btn btn-secondary">Go to Dashboard</a>
+            </div>
+            
+            <div class="tips">
+                <h3>Quick Start Tips</h3>
+                <ul>
+                    <li>Start with easy problems to build confidence and understand the platform</li>
+                    <li>Watch video solutions even if you solve the problem to learn alternative approaches</li>
+                    <li>Use the AI assistant when stuck, but try to solve problems on your own first</li>
+                    <li>Consistency is key - try to solve at least one problem every day</li>
+                    <li>Join our community discussions to learn from other developers</li>
+                </ul>
+            </div>
+            
+            <div class="message" style="margin-top: 30px;">
+                If you have any questions or need assistance, our support team is always here to help. Don't hesitate to reach out!
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Need Help?</strong></p>
+            <p>Contact us at <a href="mailto:{{supportEmail}}">{{supportEmail}}</a></p>
+            
+            <div class="social-links">
+                <a href="#" title="Twitter">𝕏</a>
+                <a href="#" title="LinkedIn">in</a>
+                <a href="#" title="GitHub">⚡</a>
+                <a href="#" title="Discord">💬</a>
+            </div>
+            
+            <p style="margin-top: 25px; font-size: 13px;">
+                © 2025 InterviewPrep Pro. All rights reserved.
+            </p>
+            <p style="font-size: 12px; color: #718096;">
+                You're receiving this email because you created an account with us.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

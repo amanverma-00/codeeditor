@@ -1,5 +1,7 @@
 const validator =require("validator");
 
+// req.body 
+
 const validate = (data)=>{
    
     const mandatoryField = ['firstName',"emailId",'password'];

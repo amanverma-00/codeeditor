@@ -33,8 +33,21 @@ function Signup() {
     }
   }, [isAuthenticated, navigate]);
 
-  const onSubmit = (data) => {
-    dispatch(registerUser(data));
+  const onSubmit = async (data) => {
+    const result = await dispatch(registerUser(data));
+    
+    // Check if registration was successful and requires verification
+    if (result.type === 'auth/register/fulfilled' && result.payload?.requiresVerification) {
+      navigate('/verify-otp', { 
+        state: { 
+          emailId: result.payload.emailId || data.emailId,
+          userId: result.payload.userId 
+        } 
+      });
+    } else if (result.type === 'auth/register/fulfilled') {
+      // If already verified (shouldn't happen in normal flow), go to home
+      navigate('/home');
+    }
   };
 
   return (

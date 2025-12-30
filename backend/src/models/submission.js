@@ -27,11 +27,11 @@ const submissionSchema = new Schema({
     default: 'pending'
   },
   runtime: {
-    type: Number,  
+    type: Number,
     default: 0
   },
   memory: {
-    type: Number,  
+    type: Number, 
     default: 0
   },
   errorMessage: {
@@ -50,7 +50,9 @@ const submissionSchema = new Schema({
   timestamps: true
 });
 
+
 submissionSchema.index({userId:1 , problemId:1});
+
 
 const Submission = mongoose.model('submission',submissionSchema);
 

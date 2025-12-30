@@ -7,7 +7,8 @@ A full-stack web application for practicing data structures and algorithms, buil
 - **Problem Solving**: Browse and solve coding problems with different difficulty levels
 - **Code Execution**: Run and test your code with Judge0 API integration
 - **AI Tutor**: Get hints and guidance from an AI-powered coding assistant
-- **User Authentication**: Secure login/signup with JWT authentication
+- **User Authentication**: Secure login/signup with JWT authentication and email verification
+- **OTP Email Verification**: Email-based OTP verification for new user registrations
 - **Progress Tracking**: Track your solving streak and statistics
 - **Admin Panel**: Admin interface for managing problems and users
 - **Video Solutions**: Watch solution videos for problems
@@ -34,6 +35,8 @@ A full-stack web application for practicing data structures and algorithms, buil
 - **Redis** - Caching and session storage
 - **JWT** - Authentication
 - **bcrypt** - Password hashing
+- **Nodemailer** - Email service for OTP delivery
+- **Handlebars** - Email templating
 - **Judge0 API** - Code execution
 - **Google Generative AI** - AI chat functionality
 - **Cloudinary** - File upload and storage
@@ -49,6 +52,7 @@ Before running this application, make sure you have:
   - Judge0 API key
   - Google Generative AI API key
   - Cloudinary credentials
+  - SMTP credentials (for email service)
 
 ## Installation & Setup
 
@@ -90,7 +94,15 @@ GROQ_KEY=your_google_generative_ai_key
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+Email Service (for OTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+FROM_EMAIL=your_email@gmail.com
+FROM_NAME=CodeOps
 
+# 
 # Development (optional)
 DISABLE_TLS_VERIFICATION=true
 ```
@@ -125,8 +137,8 @@ npm run dev
 ```
 
 3. **Access the application**:
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:3000
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:3001
 
 ### Production Mode
 
@@ -137,8 +149,10 @@ npm run build
 ```
 
 2. **Start the backend**:
-```bash
-cd backend
+```bash (sends OTP to email)
+- `POST /user/verify-otp` - Verify email with OTP code
+- `POST /user/resend-otp` - Resend OTP code
+- `POST /user/login` - User login (requires verified email)
 npm start
 ```
 

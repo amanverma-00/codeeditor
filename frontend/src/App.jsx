@@ -1,6 +1,7 @@
 import {Routes, Route ,Navigate} from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import VerifyOTP from "./pages/VerifyOTP";
 import Homepage from "./pages/Homepage";
 import LandingPageFixed from "./pages/LandingPageFixed";
 import UserProfile from "./pages/UserProfile";
@@ -66,6 +67,7 @@ function App(){
       <Route path="/home" element={isAuthenticated ?<Homepage></Homepage>:<Navigate to="/login" />}></Route>
       <Route path="/login" element={isAuthenticated?<Navigate to="/home" />:<Login></Login>}></Route>
       <Route path="/signup" element={isAuthenticated?<Navigate to="/home" />:<Signup></Signup>}></Route>
+      <Route path="/verify-otp" element={isAuthenticated?<Navigate to="/home" />:<VerifyOTP></VerifyOTP>}></Route>
       <Route path="/admin" element={isAuthenticated && user?.role === 'admin' ? <Admin /> : <Navigate to="/" />} />
       <Route path="/admin/create" element={isAuthenticated && user?.role === 'admin' ? <AdminPanel /> : <Navigate to="/" />} />
       <Route path="/admin/delete" element={isAuthenticated && user?.role === 'admin' ? <AdminDelete /> : <Navigate to="/" />} />

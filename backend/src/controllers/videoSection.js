@@ -1,8 +1,7 @@
 const cloudinary = require('cloudinary').v2;
 const Problem = require("../models/problem");
-const User = require("../models/user");
 const SolutionVideo = require("../models/solutionVideo");
-const { sanitizeFilter } = require('mongoose');
+
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -15,20 +14,23 @@ const generateUploadSignature = async (req, res) => {
     const { problemId } = req.params;
     
     const userId = req.result._id;
-    
+    // Verify problem exists
     const problem = await Problem.findById(problemId);
     if (!problem) {
       return res.status(404).json({ error: 'Problem not found' });
     }
 
+    // Generate unique public_id for the video
     const timestamp = Math.round(new Date().getTime() / 1000);
     const publicId = `leetcode-solutions/${problemId}/${userId}_${timestamp}`;
-
+    
+    // Upload parameters
     const uploadParams = {
       timestamp: timestamp,
       public_id: publicId,
     };
 
+    // Generate signature
     const signature = cloudinary.utils.api_sign_request(
       uploadParams,
       process.env.CLOUDINARY_API_SECRET
@@ -49,6 +51,7 @@ const generateUploadSignature = async (req, res) => {
   }
 };
 
+
 const saveVideoMetadata = async (req, res) => {
   try {
     const {
@@ -60,6 +63,7 @@ const saveVideoMetadata = async (req, res) => {
 
     const userId = req.result._id;
 
+    // Verify the upload with Cloudinary
     const cloudinaryResource = await cloudinary.api.resource(
       cloudinaryPublicId,
       { resource_type: 'video' }
@@ -69,6 +73,7 @@ const saveVideoMetadata = async (req, res) => {
       return res.status(400).json({ error: 'Video not found on Cloudinary' });
     }
 
+    // Check if video already exists for this problem and user
     const existingVideo = await SolutionVideo.findOne({
       problemId,
       userId,
@@ -79,8 +84,19 @@ const saveVideoMetadata = async (req, res) => {
       return res.status(409).json({ error: 'Video already exists' });
     }
 
-    const thumbnailUrl = cloudinary.image(cloudinaryResource.public_id,{resource_type: "video"})
+    // Generate thumbnail URL for the video
+    const thumbnailUrl = cloudinary.url(cloudinaryResource.public_id, {
+      resource_type: 'video',
+      transformation: [
+        { width: 400, height: 225, crop: 'fill' },
+        { quality: 'auto' },
+        { start_offset: '0' }  // Get thumbnail from start of video
+      ],
+      format: 'jpg'
+    });
 
+// https://cloudinary.com/documentation/video_effects_and_enhancements#video_thumbnails
+    // Create video solution record
     const videoSolution = await SolutionVideo.create({
       problemId,
       userId,
@@ -89,6 +105,7 @@ const saveVideoMetadata = async (req, res) => {
       duration: cloudinaryResource.duration || duration,
       thumbnailUrl
     });
+
 
     res.status(201).json({
       message: 'Video solution saved successfully',
@@ -106,12 +123,14 @@ const saveVideoMetadata = async (req, res) => {
   }
 };
 
+
 const deleteVideo = async (req, res) => {
   try {
     const { problemId } = req.params;
-    const userId = req.result._id;
 
     const video = await SolutionVideo.findOneAndDelete({problemId:problemId});
+    
+   
 
     if (!video) {
       return res.status(404).json({ error: 'Video not found' });

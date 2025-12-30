@@ -10,17 +10,8 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        fromService:
-          type: web
-          name: codeops-backend
-          property: port
-      # Add these environment variables in your Render dashboard:
-      # - DB_CONNECT_STRING (MongoDB connection string)
-      # - JWT_KEY (JWT secret key)
-      # - REDIS_PASS (Redis password)
-      # - FRONTEND_URL (Your Vercel/frontend URL)
-      # - JUDGE0_KEY (Judge0 API key)
-      # - GROQ_KEY (Google Generative AI key)
-      # - CLOUDINARY_CLOUD_NAME (Cloudinary cloud name)
-      # - CLOUDINARY_API_KEY (Cloudinary API key)
-      # - CLOUDINARY_API_SECRET (Cloudinary API secret)
+        value: 10000
+    # Add your environment variables in Render dashboard:
+    # - FRONTEND_URL (your Vercel app URL)
+    # - DB_CONNECT_STRING (MongoDB connection)
+    # - JWT_KEY, REDIS_PASS, GROQ_KEY, etc.

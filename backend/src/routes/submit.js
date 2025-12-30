@@ -1,10 +1,18 @@
 const express = require('express');
 const submitRouter = express.Router();
 const userMiddleware = require("../middleware/userMiddleware");
-const {submitCode,runCode,debugProblem} = require("../controllers/userSubmission");
+const rateLimiter = require("../middleware/rateLimitor");
+const {submitCode,runCode} = require("../controllers/userSubmission");
 
-submitRouter.post("/submit/:id", userMiddleware, submitCode);
-submitRouter.post("/run/:id",userMiddleware,runCode);
-submitRouter.get("/debug/:id", debugProblem);
+// Rate limits for code submission and execution
+const submissionLimiter = rateLimiter(10, 60); // 10 submissions per minute
+const runLimiter = rateLimiter(20, 60); // 20 run requests per minute
+
+// Submit code endpoint - runs against hidden test cases and stores in DB
+submitRouter.post("/submit/:id", userMiddleware, submissionLimiter, submitCode);
+
+// Run code endpoint - runs against visible test cases only, doesn't store in DB
+submitRouter.post("/run/:id", userMiddleware, runLimiter, runCode);
 
 module.exports = submitRouter;
+

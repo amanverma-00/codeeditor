@@ -42,79 +42,18 @@ const userSchema = new Schema({
         type:String,
         required: true
     },
-    
-    bio: {
-        type: String,
-        maxLength: 200,
-        default: ''
+    isVerified:{
+        type:Boolean,
+        default:false
     },
-    location: {
-        type: String,
-        maxLength: 50,
-        default: ''
+    otp:{
+        type:String,
+        select:false
     },
-    username: {
-        type: String,
-        maxLength: 30,
-        default: ''
+    otpExpiry:{
+        type:Date,
+        select:false
     },
-    linkedinProfile: {
-        type: String,
-        default: ''
-    },
-    githubProfile: {
-        type: String,
-        default: ''
-    },
-    contestRating: {
-        type: Number,
-        default: 1200
-    },
-    dailySubmissions: {
-        type: Map,
-        of: Number,
-        default: new Map()
-    },
-    streakData: {
-        currentStreak: {
-            type: Number,
-            default: 0
-        },
-        longestStreak: {
-            type: Number,
-            default: 0
-        },
-        lastSubmissionDate: {
-            type: Date,
-            default: null
-        },
-        streakDates: {
-            type: [Date],
-            default: []
-        }
-    },
-    profileStats: {
-        easyProblems: {
-            type: Number,
-            default: 0
-        },
-        mediumProblems: {
-            type: Number,
-            default: 0
-        },
-        hardProblems: {
-            type: Number,
-            default: 0
-        },
-        totalSubmissions: {
-            type: Number,
-            default: 0
-        },
-        acceptedSubmissions: {
-            type: Number,
-            default: 0
-        }
-    }
 },{
     timestamps:true
 });
@@ -124,6 +63,7 @@ userSchema.post('findOneAndDelete', async function (userInfo) {
       await mongoose.model('submission').deleteMany({ userId: userInfo._id });
     }
 });
+
 
 const User = mongoose.model("user",userSchema);
 

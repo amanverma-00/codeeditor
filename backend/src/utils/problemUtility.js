@@ -1,5 +1,6 @@
 const axios = require('axios');
 
+
 const getLanguageById = (lang)=>{
 
     const language = {
@@ -7,7 +8,6 @@ const getLanguageById = (lang)=>{
         "java":62,
         "javascript":63
     }
-
     return language[lang.toLowerCase()];
 }
 
@@ -42,6 +42,7 @@ async function fetchData() {
 
 }
 
+
 const waiting = async(timer)=>{
   setTimeout(()=>{
     return 1;
@@ -73,6 +74,7 @@ async function fetchData() {
 	}
 }
 
+
  while(true){
 
  const result =  await fetchData();
@@ -82,9 +84,14 @@ async function fetchData() {
   if(IsResultObtained)
     return result.submissions;
 
+  
   await waiting(1000);
 }
+
 
 }
 
 module.exports = {getLanguageById,submitBatch,submitToken};
+
+
+

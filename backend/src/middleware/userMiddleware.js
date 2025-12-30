@@ -3,7 +3,9 @@ const User = require("../models/user");
 const redisClient = require("../config/redis")
 
 const userMiddleware = async (req,res,next)=>{
+
     try{
+        
         const {token} = req.cookies;
         if(!token)
             throw new Error("Token is not persent");
@@ -22,22 +24,19 @@ const userMiddleware = async (req,res,next)=>{
             throw new Error("User Doesn't Exist");
         }
 
-        const IsBlocked = await redisClient.exists(`token:${token}`);
-
-        if(IsBlocked)
-            throw new Error("Invalid Token");
+        // Check if Redis is connected before using it
+        if(redisClient.isOpen) {
+            const IsBlocked = await redisClient.exists(`token:${token}`);
+            if(IsBlocked)
+                throw new Error("Invalid Token");
+        }
+        // If Redis is not connected, skip token blacklist check and continue
 
         req.result = result;
         next();
     }
     catch(err){
-        if (process.env.NODE_ENV === 'development') {
-            console.error('User middleware error:', err.message);
-        }
-        res.status(401).json({
-            error: "Authentication failed",
-            message: err.message
-        });
+        return res.status(401).json({ success: false, error: err.message });
     }
 }
 

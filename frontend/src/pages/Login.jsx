@@ -32,8 +32,18 @@ function Login() {
     }
   }, [isAuthenticated, navigate]);
 
-  const onSubmit = (data) => {
-    dispatch(loginUser(data));
+  const onSubmit = async (data) => {
+    const result = await dispatch(loginUser(data));
+    
+    // Check if login failed due to unverified email
+    if (result.type === 'auth/login/rejected' && result.payload?.includes('verify')) {
+      // Extract email from the form data and redirect to OTP verification
+      navigate('/verify-otp', { 
+        state: { 
+          emailId: data.emailId 
+        } 
+      });
+    }
   };
 
   return (

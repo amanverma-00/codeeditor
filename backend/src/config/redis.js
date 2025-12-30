@@ -1,20 +1,36 @@
 const { createClient } = require('redis');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../../.env') });
+require('dotenv').config(); // ✅ FIXED: Added parentheses
 
-if (!process.env.REDIS_PASS) {
-    console.error('Redis password is not defined in environment variables');
-    process.exit(1);
+// Configuration from environment variables
+const REDIS_HOST = process.env.REDIS_HOST || 'redis-17546.c11.us-east-1-3.ec2.redns.redis-cloud.com';
+const REDIS_PORT = process.env.REDIS_PORT || 17546;
+const REDIS_PASSWORD = process.env.REDIS_PASS;
+
+if (!REDIS_PASSWORD) {
+    console.warn('⚠️  Redis password not found - Redis features will be disabled');
+    // Don't exit - allow server to run without Redis
 }
 
-const redisClient = createClient({
-    username: 'default',
-    password: process.env.REDIS_PASS.trim(),
+const redisConfig = {
+    username: process.env.REDIS_USER || 'default',
+    password: REDIS_PASSWORD ? REDIS_PASSWORD.trim() : undefined,
     socket: {
-        host: 'redis-17546.c11.us-east-1-3.ec2.redns.redis-cloud.com',
-        port: 17546
+        host: REDIS_HOST,
+        port: parseInt(REDIS_PORT),
+        // Add connection timeout
+        connectTimeout: 10000,
+        reconnectStrategy: (retries) => {
+            if (retries > 5) {
+                console.error('❌ Redis max retries reached');
+                return new Error('Redis connection failed after 5 retries');
+            }
+            return Math.min(retries * 100, 3000);
+        }
     }
-});
+};
+
+const redisClient = createClient(redisConfig);
 
 redisClient.on('error', (err) => {
     console.error('Redis Client Error:', err);

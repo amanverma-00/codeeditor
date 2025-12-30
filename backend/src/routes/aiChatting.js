@@ -1,17 +1,12 @@
 const express = require('express');
-const aiRouter =  express.Router();
+const aiRouter = express.Router();
 const userMiddleware = require("../middleware/userMiddleware");
-const { solveDoubt, testGroq } = require('../controllers/solveDoubt');
+const rateLimiter = require("../middleware/rateLimitor");
+const solveDoubt = require('../controllers/solveDoubt');
 
-aiRouter.get('/status', (req, res) => {
-    res.json({ 
-        status: 'AI routes working', 
-        timestamp: new Date().toISOString(),
-        groqKeyPresent: !!process.env.GROQ_KEY
-    });
-});
+// Rate limit AI requests - 20 requests per minute (AI calls are expensive)
+const aiChatLimiter = rateLimiter(20, 60);
 
-aiRouter.post('/chat', userMiddleware, solveDoubt);
-aiRouter.get('/test', testGroq); 
+aiRouter.post('/chat', userMiddleware, aiChatLimiter, solveDoubt);
 
 module.exports = aiRouter;
