@@ -117,9 +117,7 @@ const initializeServer = async () => {
   try {
     console.log('🔍 Validating environment variables...')
     const requiredEnvVars = [
-      'PORT',
       'DB_CONNECT_STRING',
-      'REDIS_PASS',
       'JWT_KEY',
     ]
     const missing = requiredEnvVars.filter((env) => !process.env[env])
@@ -136,11 +134,22 @@ const initializeServer = async () => {
     await connectDB()
     console.log('✅ MongoDB connected successfully')
 
+    // Try to connect to Redis, but don't fail if it's unavailable
     console.log('🔄 Connecting to Redis...')
-    if (!redisClient.isOpen) {
-      await redisClient.connect()
+    try {
+      if (redisClient && !redisClient.isOpen && typeof redisClient.connect === 'function') {
+        await Promise.race([
+          redisClient.connect(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Redis connection timeout')), 5000))
+        ]);
+        console.log('✅ Redis connected successfully')
+      } else {
+        console.log('⚠️  Redis not configured - continuing without cache')
+      }
+    } catch (err) {
+      console.warn('⚠️  Redis connection failed - continuing without cache:', err.message)
+      console.log('💡 The app will work without Redis, but performance may be reduced')
     }
-    console.log('✅ Redis connected successfully')
 
     console.log('🚀 Starting Express server...')
     const server = app.listen(process.env.PORT, () => {

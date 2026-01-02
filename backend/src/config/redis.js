@@ -3,13 +3,23 @@ const path = require('path');
 require('dotenv').config(); // ✅ FIXED: Added parentheses
 
 // Configuration from environment variables
-const REDIS_HOST = process.env.REDIS_HOST || 'redis-17546.c11.us-east-1-3.ec2.redns.redis-cloud.com';
-const REDIS_PORT = process.env.REDIS_PORT || 17546;
+const REDIS_HOST = process.env.REDIS_HOST;
+const REDIS_PORT = process.env.REDIS_PORT;
 const REDIS_PASSWORD = process.env.REDIS_PASS;
 
-if (!REDIS_PASSWORD) {
-    console.warn('⚠️  Redis password not found - Redis features will be disabled');
-    // Don't exit - allow server to run without Redis
+if (!REDIS_HOST || !REDIS_PORT || !REDIS_PASSWORD) {
+    console.warn('⚠️  Redis configuration incomplete - Redis features will be disabled');
+    console.warn('💡 Set REDIS_HOST, REDIS_PORT, and REDIS_PASS to enable Redis');
+    // Export a mock client that won't crash the app
+    module.exports = {
+        isOpen: false,
+        connect: async () => { console.log('⚠️  Redis disabled - skipping connection'); },
+        quit: async () => {},
+        get: async () => null,
+        set: async () => null,
+        del: async () => null,
+    };
+    return;
 }
 
 const redisConfig = {
