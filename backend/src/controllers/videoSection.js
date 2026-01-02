@@ -146,4 +146,30 @@ const deleteVideo = async (req, res) => {
   }
 };
 
-module.exports = {generateUploadSignature,saveVideoMetadata,deleteVideo};
+const getVideoByProblemId = async (req, res) => {
+  try {
+    const { problemId } = req.params;
+
+    const video = await SolutionVideo.findOne({ problemId });
+
+    if (!video) {
+      return res.status(404).json({ error: 'Video not found for this problem' });
+    }
+
+    res.json({
+      video: {
+        id: video._id,
+        secureUrl: video.secureUrl,
+        thumbnailUrl: video.thumbnailUrl,
+        duration: video.duration,
+        uploadedAt: video.createdAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching video:', error);
+    res.status(500).json({ error: 'Failed to fetch video' });
+  }
+};
+
+module.exports = {generateUploadSignature,saveVideoMetadata,deleteVideo,getVideoByProblemId};

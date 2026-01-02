@@ -54,6 +54,45 @@ const userSchema = new Schema({
         type:Date,
         select:false
     },
+    streakData:{
+        currentStreak:{
+            type:Number,
+            default:0
+        },
+        longestStreak:{
+            type:Number,
+            default:0
+        },
+        lastSubmissionDate:{
+            type:Date,
+            default:null
+        },
+        streakDates:[{
+            type:Date
+        }]
+    },
+    profileStats:{
+        easyProblems:{
+            type:Number,
+            default:0
+        },
+        mediumProblems:{
+            type:Number,
+            default:0
+        },
+        hardProblems:{
+            type:Number,
+            default:0
+        },
+        totalSubmissions:{
+            type:Number,
+            default:0
+        },
+        acceptedSubmissions:{
+            type:Number,
+            default:0
+        }
+    }
 },{
     timestamps:true
 });

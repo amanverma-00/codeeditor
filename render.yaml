@@ -3,15 +3,25 @@ services:
     name: codeops-backend
     env: node
     plan: free
+    region: oregon
     rootDir: backend
     buildCommand: npm install
     startCommand: node src/index.js
+    healthCheckPath: /
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
     # Add your environment variables in Render dashboard:
+    # Required:
+    # - MONGO_URI (MongoDB Atlas connection string)
+    # - JWT_KEY (minimum 32 characters)
     # - FRONTEND_URL (your Vercel app URL)
-    # - DB_CONNECT_STRING (MongoDB connection)
-    # - JWT_KEY, REDIS_PASS, GROQ_KEY, etc.
+    #
+    # Optional (based on your features):
+    # - REDIS_HOST, REDIS_PORT, REDIS_PASS
+    # - CLOUD_NAME, API_KEY, API_SECRET (Cloudinary)
+    # - GROQ_KEY (AI features)
+    # - EMAIL_USER, EMAIL_PASS (email features)
+    # - JUDGE0_URL, JUDGE0_API_KEY (code execution)

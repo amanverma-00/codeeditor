@@ -3,11 +3,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { verifyOTP, resendOTP } from '../authSlice';
 import { motion } from 'framer-motion';
-import { Mail, ArrowRight, RefreshCw, CheckCircle } from 'lucide-react';
+import { Mail, RefreshCw, CheckCircle, ArrowRight } from 'lucide-react';
 
 function VerifyOTP() {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [isHovering, setIsHovering] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resendSuccess, setResendSuccess] = useState(false);
   const inputRefs = useRef([]);
@@ -37,6 +37,17 @@ function VerifyOTP() {
       return () => clearTimeout(timer);
     }
   }, [resendCooldown]);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePos({
+        x: e.clientX / window.innerWidth,
+        y: e.clientY / window.innerHeight,
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   const handleChange = (index, value) => {
     if (!/^\d*$/.test(value)) return;
@@ -94,204 +105,256 @@ function VerifyOTP() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white overflow-hidden relative flex items-center justify-center p-4">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -inset-[10px] opacity-30">
-          {[...Array(30)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute bg-white rounded-full"
-              style={{
-                width: Math.random() * 4 + 1,
-                height: Math.random() * 4 + 1,
-                left: Math.random() * 100 + '%',
-                top: Math.random() * 100 + '%',
-              }}
-              animate={{
-                y: [0, -30, 0],
-                opacity: [0, 1, 0],
-              }}
-              transition={{
-                duration: Math.random() * 3 + 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-              }}
-            />
-          ))}
-        </div>
-      </div>
+    <div 
+      className="min-h-screen text-[#e0e0e0] overflow-hidden relative flex items-center justify-center p-4"
+      style={{
+        fontFamily: "'IBM Plex Mono', 'Fira Code', monospace",
+        backgroundColor: '#0a0a0f',
+      }}
+    >
+      {/* Animated grid background */}
+      <div 
+        className="fixed inset-0"
+        style={{
+          opacity: 0.03,
+          backgroundImage: `
+            linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px',
+          transform: `translate(${mousePos.x * 20}px, ${mousePos.y * 20}px)`,
+          transition: 'transform 0.3s ease-out',
+        }}
+      />
 
-      <motion.div 
-        className="absolute top-6 left-6 z-10"
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8 }}
-      >
-        <motion.div 
-          className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent cursor-pointer"
-          whileHover={{ scale: 1.05 }}
-          onClick={() => navigate('/')}
-        >
-          CodeOps
-        </motion.div>
-      </motion.div>
+      {/* Scanline effect */}
+      <div 
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          zIndex: 50,
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px)',
+        }}
+      />
 
-      <motion.div 
-        className="relative z-10 w-full max-w-md"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
+      {/* Glowing orb */}
+      <div 
+        className="fixed pointer-events-none"
+        style={{
+          width: '500px',
+          height: '500px',
+          zIndex: 0,
+          left: `${mousePos.x * 100}%`,
+          top: `${mousePos.y * 100}%`,
+          transform: 'translate(-50%, -50%)',
+          background: 'radial-gradient(circle, rgba(0, 255, 136, 0.08) 0%, transparent 70%)',
+          transition: 'left 0.5s ease-out, top 0.5s ease-out',
+        }}
+      />
+
+      {/* Navigation */}
+      <motion.nav 
+        className="fixed top-0 left-0 right-0 px-8 py-6"
+        style={{ zIndex: 40 }}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
       >
-        <div className="p-8 rounded-2xl bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
           <motion.div 
-            className="text-center mb-8"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={() => navigate('/')}
+            whileHover={{ scale: 1.02 }}
           >
-            <div className="flex justify-center mb-4">
-              <div className="p-4 rounded-full bg-purple-500/20 border border-purple-500/30">
-                <Mail className="h-8 w-8 text-purple-400" />
-              </div>
+            <div 
+              className="w-10 h-10 flex items-center justify-center"
+              style={{ border: '2px solid #00ff88' }}
+            >
+              <span className="font-bold text-lg" style={{ color: '#00ff88' }}>C</span>
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent mb-2">
-              Verify Your Email
-            </h1>
-            <p className="text-white/70">
-              We've sent a 6-digit code to
-            </p>
-            <p className="text-purple-400 font-semibold mt-1">
-              {emailId}
-            </p>
+            <span className="text-xl font-bold tracking-wider">
+              CODE<span style={{ color: '#00ff88' }}>OPS</span>
+            </span>
           </motion.div>
+        </div>
+      </motion.nav>
+
+      {/* Main Content */}
+      <div className="w-full max-w-md relative" style={{ zIndex: 10 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="p-8"
+          style={{
+            backgroundColor: 'rgba(10, 10, 15, 0.8)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(0, 255, 136, 0.2)',
+          }}
+        >
+          <div className="mb-8 text-center">
+            <motion.div
+              className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(0, 255, 136, 0.1)', border: '2px solid #00ff88' }}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 200 }}
+            >
+              <Mail className="w-8 h-8" style={{ color: '#00ff88' }} />
+            </motion.div>
+            <h1 
+              className="text-3xl font-bold mb-2"
+              style={{ 
+                fontFamily: "'Orbitron', sans-serif",
+                color: '#e0e0e0',
+              }}
+            >
+              VERIFY EMAIL
+            </h1>
+            <p className="text-sm" style={{ color: '#808080' }}>
+              Enter the 6-digit code sent to<br />
+              <span style={{ color: '#00ff88' }}>{emailId}</span>
+            </p>
+          </div>
 
           {error && (
             <motion.div 
-              className="mb-6 p-4 rounded-lg bg-red-500/20 border border-red-500/30 text-red-200"
+              className="mb-6 p-4"
+              style={{
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                color: '#ef4444',
+              }}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              {error}
+              <div className="flex items-center gap-2">
+                <span>⚠</span>
+                <span>{error}</span>
+              </div>
             </motion.div>
           )}
 
           {resendSuccess && (
             <motion.div 
-              className="mb-6 p-4 rounded-lg bg-green-500/20 border border-green-500/30 text-green-200 flex items-center gap-2"
+              className="mb-6 p-4"
+              style={{
+                backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                border: '1px solid rgba(0, 255, 136, 0.3)',
+                color: '#00ff88',
+              }}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <CheckCircle className="h-5 w-5" />
-              OTP sent successfully!
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5" />
+                <span>New code sent successfully!</span>
+              </div>
             </motion.div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <motion.div
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-            >
-              <label className="block text-sm font-medium text-white/80 mb-4 text-center">
-                Enter 6-digit code
-              </label>
-              <div className="flex justify-center gap-2">
-                {otp.map((digit, index) => (
-                  <motion.input
-                    key={index}
-                    ref={(el) => (inputRefs.current[index] = el)}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleChange(index, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(index, e)}
-                    onPaste={index === 0 ? handlePaste : undefined}
-                    className="w-12 h-12 text-center text-2xl font-bold bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all"
-                    whileFocus={{ scale: 1.1 }}
-                    autoFocus={index === 0}
-                  />
-                ))}
-              </div>
-            </motion.div>
+          <form onSubmit={handleSubmit}>
+            <div className="flex justify-center gap-3 mb-8">
+              {otp.map((digit, index) => (
+                <motion.input
+                  key={index}
+                  ref={(el) => (inputRefs.current[index] = el)}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  onPaste={handlePaste}
+                  className="w-12 h-14 text-center text-2xl font-bold transition-all"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: `2px solid ${digit ? '#00ff88' : 'rgba(128, 128, 128, 0.3)'}`,
+                    color: '#e0e0e0',
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#00ff88'}
+                  onBlur={(e) => e.target.style.borderColor = digit ? '#00ff88' : 'rgba(128, 128, 128, 0.3)'}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                />
+              ))}
+            </div>
 
-            <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
+            <motion.button
+              type="submit"
+              disabled={loading || otp.join('').length !== 6}
+              className="w-full py-3.5 font-bold tracking-wider transition-all disabled:opacity-50 relative overflow-hidden group mb-6"
+              style={{ 
+                backgroundColor: '#00ff88',
+                color: '#0a0a0f',
+              }}
+              whileHover={{ scale: loading || otp.join('').length !== 6 ? 1 : 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <motion.button
-                type="submit"
-                disabled={loading || otp.join('').length !== 6}
-                className="w-full py-3 px-6 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg font-semibold text-white flex items-center justify-center gap-2 hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                whileHover={{ scale: loading ? 1 : 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-              >
+              <span className="relative flex items-center justify-center gap-2" style={{ zIndex: 10 }}>
                 {loading ? (
                   <>
-                    <motion.div 
-                      className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                    <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="w-5 h-5 border-2 border-[#0a0a0f] border-t-transparent rounded-full"
                     />
-                    Verifying...
+                    VERIFYING...
                   </>
                 ) : (
                   <>
-                    Verify Email
-                    <motion.div
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      <ArrowRight className="w-5 h-5" />
-                    </motion.div>
+                    VERIFY CODE
+                    <ArrowRight className="w-5 h-5" />
                   </>
                 )}
+              </span>
+              <div 
+                className="absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-300" 
+                style={{ backgroundColor: '#00cc6f' }}
+              />
+            </motion.button>
+
+            <div className="text-center">
+              <p className="text-sm mb-3" style={{ color: '#808080' }}>
+                Didn't receive the code?
+              </p>
+              <motion.button
+                type="button"
+                onClick={handleResendOTP}
+                disabled={resendCooldown > 0}
+                className="text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
+                style={{ color: resendCooldown > 0 ? '#808080' : '#00ff88' }}
+                whileHover={{ scale: resendCooldown > 0 ? 1 : 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                {resendCooldown > 0 
+                  ? `Resend in ${resendCooldown}s` 
+                  : 'Resend Code'}
               </motion.button>
-            </motion.div>
+            </div>
           </form>
 
           <motion.div 
-            className="text-center mt-6"
+            className="mt-8 pt-6 text-center"
+            style={{ borderTop: '1px solid rgba(128, 128, 128, 0.2)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
+            transition={{ delay: 0.5 }}
           >
-            <p className="text-white/60 mb-3">
-              Didn't receive the code?
-            </p>
-            <motion.button
-              onClick={handleResendOTP}
-              disabled={resendCooldown > 0}
-              className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              whileHover={{ scale: resendCooldown > 0 ? 1 : 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <RefreshCw className={`w-4 h-4 ${resendCooldown > 0 ? '' : 'hover:rotate-180 transition-transform duration-500'}`} />
-              {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
-            </motion.button>
-          </motion.div>
-
-          <motion.div 
-            className="text-center mt-8 pt-6 border-t border-white/10"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-          >
-            <p className="text-white/60">
+            <p style={{ color: '#808080' }}>
               Wrong email?{' '}
               <NavLink 
-                to="/signup" 
-                className="text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+                to="/signup"
+                style={{ color: '#00ff88', fontWeight: 600 }}
+                className="hover:underline"
               >
-                Go Back
+                Go back
               </NavLink>
             </p>
           </motion.div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }
-
 export default VerifyOTP;

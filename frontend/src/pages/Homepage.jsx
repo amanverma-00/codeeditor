@@ -7,23 +7,17 @@ import {
   Trophy, 
   Target, 
   Search, 
-  Filter,
   CheckCircle,
   User,
   LogOut,
   Settings,
-  BarChart3,
-  BookOpen,
-  Calendar,
   Award,
-  Compass,
-  Zap,
-  Medal,
   Flame,
   Tag,
   ChevronLeft,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  ArrowRight
 } from 'lucide-react';
 import axiosClient from '../utils/axiosClient';
 import { logoutUser } from '../authSlice';
@@ -39,11 +33,18 @@ function Homepage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
-  const [showSearchBar, setShowSearchBar] = useState(false);
   const [userStreak, setUserStreak] = useState(0);
   const [openTagDropdowns, setOpenTagDropdowns] = useState({});
   const problemsPerPage = 20;
-  const [activeTab, setActiveTab] = useState('problems');
+
+  const [stats, setStats] = useState({
+    solved: 0,
+    total: 0,
+    easy: 0,
+    medium: 0,
+    hard: 0,
+    streak: 0
+  });
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -97,12 +98,13 @@ function Homepage() {
       }
     };
 
-    fetchProblems();
-    if (user) {
+    // Only fetch data if user is authenticated
+    if (isAuthenticated && user) {
+      fetchProblems();
       fetchSolvedProblems();
       fetchUserStreak();
     }
-  }, [user]);
+  }, [user, isAuthenticated]);
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -112,9 +114,16 @@ function Homepage() {
 
   const filteredProblems = problems.filter(problem => {
     const difficultyMatch = selectedDifficulty === 'all' || problem.difficulty === selectedDifficulty;
-    const tagMatch = selectedTag === 'all' || problem.tags === selectedTag;
-    const searchMatch = searchQuery === '' || 
-      problem.title.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const problemTags = Array.isArray(problem.tags) 
+      ? problem.tags 
+      : (typeof problem.tags === 'string' 
+          ? problem.tags.split(',').map(tag => tag.trim()) 
+          : []);
+    const tagMatch = selectedTag === 'all' || problemTags.includes(selectedTag);
+    
+    const searchMatch = !searchQuery || problem.title.toLowerCase().includes(searchQuery.toLowerCase());
+    
     return difficultyMatch && tagMatch && searchMatch;
   });
 
@@ -124,58 +133,44 @@ function Homepage() {
   const totalPages = Math.ceil(filteredProblems.length / problemsPerPage);
 
   const getDifficultyColor = (difficulty) => {
-    switch (difficulty.toLowerCase()) {
-      case 'easy': return 'text-green-500';
-      case 'medium': return 'text-yellow-500';
-      case 'hard': return 'text-red-500';
-      default: return 'text-gray-500';
+    switch (difficulty) {
+      case 'easy': return 'bg-green-500/20 border-green-500/50 text-green-400';
+      case 'medium': return 'bg-yellow-500/20 border-yellow-500/50 text-yellow-400';
+      case 'hard': return 'bg-red-500/20 border-red-500/50 text-red-400';
+      default: return 'bg-gray-500/20 border-gray-500/50 text-gray-400';
     }
-  };
-
-  const getDifficultyBadgeColor = (difficulty) => {
-    switch (difficulty.toLowerCase()) {
-      case 'easy': return 'bg-green-100 text-green-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'hard': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const stats = {
-    solved: solvedProblems.length,
-    total: problems.length,
-    easy: solvedProblems.filter(p => p.difficulty === 'easy').length,
-    medium: solvedProblems.filter(p => p.difficulty === 'medium').length,
-    hard: solvedProblems.filter(p => p.difficulty === 'hard').length,
-    streak: userStreak 
-  };
-
-  const uniqueTags = [...new Set(problems.map(p => p.tags))].filter(Boolean);
-
-  const difficultyColors = {
-    easy: 'text-green-400 bg-green-900/50 border-green-500/50',
-    medium: 'text-yellow-400 bg-yellow-900/50 border-yellow-500/50',
-    hard: 'text-red-400 bg-red-900/50 border-red-500/50'
-  };
-
-  const toggleTagDropdown = (problemId) => {
-    setOpenTagDropdowns(prev => ({
-      ...prev,
-      [problemId]: !prev[problemId]
-    }));
-  };
-
-  const closeAllTagDropdowns = () => {
-    setOpenTagDropdowns({});
   };
 
   useEffect(() => {
-    const handleClickOutside = () => {
-      closeAllTagDropdowns();
+    const easy = solvedProblems.filter(p => p.difficulty === 'easy').length;
+    const medium = solvedProblems.filter(p => p.difficulty === 'medium').length;
+    const hard = solvedProblems.filter(p => p.difficulty === 'hard').length;
+    
+    setStats({
+      solved: solvedProblems.length,
+      total: problems.length,
+      easy,
+      medium,
+      hard,
+      streak: userStreak
+    });
+  }, [problems, solvedProblems, userStreak]);
+
+  const uniqueTags = [...new Set(problems.flatMap(p => {
+    if (Array.isArray(p.tags)) return p.tags;
+    if (typeof p.tags === 'string') return p.tags.split(',').map(tag => tag.trim());
+    return [];
+  }))].filter(Boolean);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (showTagDropdown && !e.target.closest('.tag-dropdown-container')) {
+        setShowTagDropdown(false);
+      }
     };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
+  }, [showTagDropdown]);
 
   const parseTagsToArray = (tags) => {
     if (Array.isArray(tags)) return tags;
@@ -188,31 +183,32 @@ function Homepage() {
 
   const TagDropdown = ({ problem, index }) => {
     try {
-      if (!problem || !problem._id) {
-        return (
-          <span className="inline-flex px-3 py-1 text-sm font-medium bg-gray-700 text-gray-400 rounded-full">
-            No data
-          </span>
-        );
-      }
-
-      const tags = parseTagsToArray(problem.tags);
-      const isOpen = openTagDropdowns?.[problem._id] || false;
+      const tags = parseTags(problem.tags);
+      const isOpen = openTagDropdowns[index];
 
       const handleDropdownClick = (e) => {
         e.stopPropagation();
-        toggleTagDropdown(problem._id);
+        setOpenTagDropdowns(prev => ({
+          ...prev,
+          [index]: !prev[index]
+        }));
       };
 
       const handleTagClick = (tag, e) => {
         e.stopPropagation();
         setSelectedTag(tag);
-        closeAllTagDropdowns();
+        setOpenTagDropdowns({});
       };
 
-      if (tags.length === 0) {
+      if (!tags || tags.length === 0) {
         return (
-          <span className="inline-flex px-3 py-1 text-sm font-medium bg-gray-700 text-gray-400 rounded-full">
+          <span 
+            className="inline-flex px-3 py-1 text-sm font-medium rounded-full"
+            style={{
+              backgroundColor: 'rgba(128, 128, 128, 0.1)',
+              color: '#808080',
+            }}
+          >
             No tags
           </span>
         );
@@ -220,31 +216,56 @@ function Homepage() {
 
       if (tags.length === 1) {
         return (
-          <button
+          <motion.button
             onClick={(e) => handleTagClick(tags[0], e)}
-            className="inline-flex px-3 py-1 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors cursor-pointer"
+            className="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full transition-all"
+            style={{
+              backgroundColor: 'rgba(0, 255, 136, 0.1)',
+              border: '1px solid rgba(0, 255, 136, 0.3)',
+              color: '#00ff88',
+            }}
+            whileHover={{ 
+              scale: 1.05,
+              backgroundColor: 'rgba(0, 255, 136, 0.2)',
+            }}
+            whileTap={{ scale: 0.95 }}
           >
             {tags[0]}
-          </button>
+          </motion.button>
         );
       }
 
       return (
         <div className="relative" onClick={(e) => e.stopPropagation()}>
-          <button
+          <motion.button
             onClick={handleDropdownClick}
-            className="inline-flex items-center px-3 py-1 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors cursor-pointer space-x-1"
+            className="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full transition-all space-x-1"
+            style={{
+              backgroundColor: 'rgba(0, 255, 136, 0.1)',
+              border: '1px solid rgba(0, 255, 136, 0.3)',
+              color: '#00ff88',
+            }}
+            whileHover={{ 
+              scale: 1.05,
+              backgroundColor: 'rgba(0, 255, 136, 0.2)',
+            }}
+            whileTap={{ scale: 0.95 }}
           >
             <span>{tags.length} tags</span>
             <ChevronDown className={`w-3 h-3 transition-transform ${
               isOpen ? 'rotate-180' : ''
             }`} />
-          </button>
+          </motion.button>
           
           <AnimatePresence>
             {isOpen && (
               <motion.div
-                className="absolute top-full left-0 mt-1 bg-gray-800 rounded-lg shadow-xl border border-gray-600 z-[100] min-w-32"
+                className="absolute top-full left-0 mt-1 rounded-lg shadow-xl z-[100] min-w-32"
+                style={{
+                  backgroundColor: 'rgba(10, 10, 15, 0.95)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(0, 255, 136, 0.2)',
+                }}
                 initial={{ opacity: 0, y: -10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -252,13 +273,18 @@ function Homepage() {
               >
                 <div className="p-1">
                   {tags.map((tag, tagIndex) => (
-                    <button
+                    <motion.button
                       key={tagIndex}
                       onClick={(e) => handleTagClick(tag, e)}
-                      className="w-full text-left px-3 py-2 rounded-md transition-colors text-gray-200 hover:bg-gray-700 block"
+                      className="w-full text-left px-3 py-2 rounded-md transition-all block"
+                      style={{ color: '#e0e0e0' }}
+                      whileHover={{ 
+                        backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                        color: '#00ff88'
+                      }}
                     >
                       {tag}
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
               </motion.div>
@@ -269,7 +295,13 @@ function Homepage() {
     } catch (error) {
       console.error('Error in TagDropdown:', error);
       return (
-        <span className="inline-flex px-3 py-1 text-sm font-medium bg-red-700 text-red-200 rounded-full">
+        <span 
+          className="inline-flex px-3 py-1 text-sm font-medium rounded-full"
+          style={{
+            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+            color: '#ef4444',
+          }}
+        >
           Error
         </span>
       );
@@ -277,294 +309,445 @@ function Homepage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900"><motion.header 
-        className="bg-gray-800/80 backdrop-blur-lg shadow-lg border-b border-gray-700/50 sticky top-0 z-50"
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+    <div 
+      className="min-h-screen text-[#e0e0e0] overflow-hidden relative"
+      style={{
+        fontFamily: "'IBM Plex Mono', 'Fira Code', monospace",
+        backgroundColor: '#0a0a0f',
+      }}
+    >
+      {/* Animated grid background */}
+      <div 
+        className="fixed inset-0"
+        style={{
+          opacity: 0.03,
+          backgroundImage: `
+            linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px',
+        }}
+      />
+
+      {/* Scanline effect */}
+      <div 
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          zIndex: 50,
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px)',
+        }}
+      />
+
+      {/* Header */}
+      <motion.header 
+        className="sticky top-0 px-8 py-6"
+        style={{ 
+          zIndex: 40,
+          backgroundColor: 'rgba(10, 10, 15, 0.8)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(0, 255, 136, 0.1)',
+        }}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
       >
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between"><div className="flex items-center space-x-6"><motion.div 
-                className="flex items-center space-x-3"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Code className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  CodeOps
-                </span>
-              </motion.div><div className="flex items-center space-x-2">
-                <motion.button
-                  onClick={() => setActiveTab('problems')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                    activeTab === 'problems'
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'text-gray-300 hover:bg-blue-600/20 hover:text-blue-400'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <BookOpen className="w-4 h-4 inline mr-2" />
-                  Problems
-                </motion.button>
-                
-                <motion.button
-                  onClick={() => setActiveTab('explore')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                    activeTab === 'explore'
-                      ? 'bg-purple-600 text-white shadow-lg'
-                      : 'text-gray-300 hover:bg-purple-600/20 hover:text-purple-400'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Compass className="w-4 h-4 inline mr-2" />
-                  Explore
-                </motion.button>
-                
-                <motion.button
-                  onClick={() => setActiveTab('contest')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                    activeTab === 'contest'
-                      ? 'bg-orange-600 text-white shadow-lg'
-                      : 'text-gray-300 hover:bg-orange-600/20 hover:text-orange-400'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Medal className="w-4 h-4 inline mr-2" />
-                  Contest
-                </motion.button>
-              </div>
-            </div><div className="flex items-center space-x-4"><motion.div
-                className="flex items-center space-x-2 bg-gradient-to-r from-orange-400 to-red-500 text-white px-4 py-2 rounded-full shadow-lg"
-                whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)" }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                <Flame className="w-4 h-4" />
-                <span className="font-bold">{stats.streak}</span>
-                <span className="text-sm">Day Streak</span>
-              </motion.div>{user?.role === 'admin' && (
-                <motion.button
-                  onClick={() => navigate('/admin')}
-                  className="p-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <Settings className="w-5 h-5" />
-                </motion.button>
-              )}<motion.div 
-                className="flex items-center space-x-3 bg-gray-700/50 backdrop-blur-sm border border-gray-600 rounded-full px-4 py-2 shadow-lg cursor-pointer"
-                whileHover={{ scale: 1.02, boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)" }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                onClick={() => navigate('/profile')}
-              >
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-white" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-white">{user?.firstName || 'User'}</span>
-                  <span className="text-xs text-gray-300">{stats.solved} solved</span>
-                </div>
-                <motion.button
-                  onClick={handleLogout}
-                  className="p-1 text-red-500 hover:text-red-700 transition-colors"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <LogOut className="w-4 h-4" />
-                </motion.button>
-              </motion.div>
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <motion.div 
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={() => navigate('/')}
+            whileHover={{ scale: 1.02 }}
+          >
+            <div 
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(135deg, #00ff88 0%, #00cc70 100%)',
+              }}
+            >
+              <Code className="w-6 h-6" style={{ color: '#0a0a0f' }} />
             </div>
+            <span 
+              className="text-2xl font-bold"
+              style={{ 
+                fontFamily: "'Orbitron', sans-serif",
+                color: '#e0e0e0',
+              }}
+            >
+              CODEOPS
+            </span>
+          </motion.div>
+
+          <div className="flex items-center gap-4">
+            {/* Streak Display */}
+            <motion.div
+              className="flex items-center gap-2 px-4 py-2 rounded-full"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255, 136, 0, 0.1) 0%, rgba(255, 68, 68, 0.1) 100%)',
+                border: '1px solid rgba(255, 136, 0, 0.3)',
+              }}
+              whileHover={{ scale: 1.05 }}
+            >
+              <Flame className="w-4 h-4" style={{ color: '#ff8800' }} />
+              <span className="font-bold" style={{ color: '#ff8800' }}>{stats.streak}</span>
+              <span className="text-sm" style={{ color: '#808080' }}>Day Streak</span>
+            </motion.div>
+
+            {/* Admin Button */}
+            {user?.role === 'admin' && (
+              <motion.button
+                onClick={() => navigate('/admin')}
+                className="p-2 rounded-lg transition-all"
+                style={{
+                  color: '#808080',
+                  backgroundColor: 'rgba(128, 128, 128, 0.1)',
+                }}
+                whileHover={{ 
+                  scale: 1.1,
+                  backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                  color: '#00ff88'
+                }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Settings className="w-5 h-5" />
+              </motion.button>
+            )}
+
+            {/* User Profile */}
+            <motion.div 
+              className="flex items-center gap-3 px-4 py-2 rounded-full cursor-pointer"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(128, 128, 128, 0.3)',
+              }}
+              whileHover={{ 
+                scale: 1.02,
+                borderColor: 'rgba(0, 255, 136, 0.5)',
+              }}
+              onClick={() => navigate('/profile')}
+            >
+              <div 
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(135deg, #00ff88 0%, #00cc70 100%)',
+                }}
+              >
+                <User className="w-4 h-4" style={{ color: '#0a0a0f' }} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold" style={{ color: '#e0e0e0' }}>
+                  {user?.firstName || 'User'}
+                </span>
+                <span className="text-xs" style={{ color: '#808080' }}>
+                  {stats.solved} solved
+                </span>
+              </div>
+              <motion.button
+                onClick={handleLogout}
+                className="p-1 transition-colors"
+                style={{ color: '#ef4444' }}
+                whileHover={{ scale: 1.1, color: '#dc2626' }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <LogOut className="w-4 h-4" />
+              </motion.button>
+            </motion.div>
           </div>
         </div>
-      </motion.header><div className="max-w-7xl mx-auto px-6 py-8">
-        <AnimatePresence mode="wait">
-          {activeTab === 'problems' && (
-            <motion.div
-              key="problems"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            ><motion.div 
+      </motion.header>
+
+      <div className="max-w-7xl mx-auto px-6 py-8 relative" style={{ zIndex: 1 }}>
+        {/* Stats Cards */}
+              <motion.div 
                 className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
                 <motion.div
-                  className="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 border border-gray-700/50 shadow-xl"
-                  whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.3)" }}
-                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  className="p-6 rounded-2xl"
+                  style={{
+                    backgroundColor: 'rgba(10, 10, 15, 0.8)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(0, 255, 136, 0.2)',
+                  }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    borderColor: 'rgba(0, 255, 136, 0.5)',
+                  }}
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <Trophy className="w-8 h-8 text-yellow-400" />
-                    <span className="text-2xl font-bold text-white">{stats.solved}</span>
+                    <Trophy className="w-8 h-8" style={{ color: '#fbbf24' }} />
+                    <span className="text-2xl font-bold" style={{ color: '#e0e0e0' }}>
+                      {stats.solved}
+                    </span>
                   </div>
-                  <p className="text-gray-300 font-medium">Problems Solved</p>
-                  <div className="mt-2 text-sm text-gray-400">Total: {stats.total}</div>
+                  <p className="font-medium" style={{ color: '#e0e0e0' }}>Problems Solved</p>
+                  <div className="mt-2 text-sm" style={{ color: '#808080' }}>
+                    Total: {stats.total}
+                  </div>
                 </motion.div>
 
                 <motion.div
-                  className="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 border border-gray-700/50 shadow-xl"
-                  whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.3)" }}
-                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  className="p-6 rounded-2xl"
+                  style={{
+                    backgroundColor: 'rgba(10, 10, 15, 0.8)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(34, 197, 94, 0.2)',
+                  }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    borderColor: 'rgba(34, 197, 94, 0.5)',
+                  }}
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                      <Zap className="w-4 h-4 text-white" />
+                    <div 
+                      className="w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: '#22c55e' }}
+                    >
+                      <CheckCircle className="w-4 h-4" style={{ color: '#0a0a0f' }} />
                     </div>
-                    <span className="text-2xl font-bold text-green-400">{stats.easy}</span>
+                    <span className="text-2xl font-bold" style={{ color: '#22c55e' }}>
+                      {stats.easy}
+                    </span>
                   </div>
-                  <p className="text-gray-300 font-medium">Easy</p>
-                  <div className="mt-2 text-sm text-gray-400">{problems.filter(p => p.difficulty === 'easy').length} total</div>
+                  <p className="font-medium" style={{ color: '#e0e0e0' }}>Easy</p>
+                  <div className="mt-2 text-sm" style={{ color: '#808080' }}>
+                    {problems.filter(p => p.difficulty === 'easy').length} total
+                  </div>
                 </motion.div>
 
                 <motion.div
-                  className="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 border border-gray-700/50 shadow-xl"
-                  whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.3)" }}
-                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  className="p-6 rounded-2xl"
+                  style={{
+                    backgroundColor: 'rgba(10, 10, 15, 0.8)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(234, 179, 8, 0.2)',
+                  }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    borderColor: 'rgba(234, 179, 8, 0.5)',
+                  }}
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                      <Target className="w-4 h-4 text-white" />
+                    <div 
+                      className="w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: '#eab308' }}
+                    >
+                      <Target className="w-4 h-4" style={{ color: '#0a0a0f' }} />
                     </div>
-                    <span className="text-2xl font-bold text-yellow-400">{stats.medium}</span>
+                    <span className="text-2xl font-bold" style={{ color: '#eab308' }}>
+                      {stats.medium}
+                    </span>
                   </div>
-                  <p className="text-gray-300 font-medium">Medium</p>
-                  <div className="mt-2 text-sm text-gray-400">{problems.filter(p => p.difficulty === 'medium').length} total</div>
+                  <p className="font-medium" style={{ color: '#e0e0e0' }}>Medium</p>
+                  <div className="mt-2 text-sm" style={{ color: '#808080' }}>
+                    {problems.filter(p => p.difficulty === 'medium').length} total
+                  </div>
                 </motion.div>
 
                 <motion.div
-                  className="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 border border-gray-700/50 shadow-xl"
-                  whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.3)" }}
-                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  className="p-6 rounded-2xl"
+                  style={{
+                    backgroundColor: 'rgba(10, 10, 15, 0.8)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                  }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    borderColor: 'rgba(239, 68, 68, 0.5)',
+                  }}
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                      <Award className="w-4 h-4 text-white" />
+                    <div 
+                      className="w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: '#ef4444' }}
+                    >
+                      <Award className="w-4 h-4" style={{ color: '#0a0a0f' }} />
                     </div>
-                    <span className="text-2xl font-bold text-red-400">{stats.hard}</span>
+                    <span className="text-2xl font-bold" style={{ color: '#ef4444' }}>
+                      {stats.hard}
+                    </span>
                   </div>
-                  <p className="text-gray-300 font-medium">Hard</p>
-                  <div className="mt-2 text-sm text-gray-400">{problems.filter(p => p.difficulty === 'hard').length} total</div>
+                  <p className="font-medium" style={{ color: '#e0e0e0' }}>Hard</p>
+                  <div className="mt-2 text-sm" style={{ color: '#808080' }}>
+                    {problems.filter(p => p.difficulty === 'hard').length} total
+                  </div>
                 </motion.div>
-              </motion.div><motion.div
-                className="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 border border-gray-700/50 shadow-xl mb-8"
+              </motion.div>              {/* Filters */}
+              <motion.div
+                className="p-6 rounded-2xl mb-8 relative"
+                style={{
+                  backgroundColor: 'rgba(10, 10, 15, 0.8)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(0, 255, 136, 0.2)',
+                  zIndex: 10,
+                }}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
               >
-                <div className="flex flex-wrap items-center gap-4"><motion.button
-                    onClick={() => setShowSearchBar(!showSearchBar)}
-                    className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Search className="w-4 h-4" />
-                    <span>Search Problems</span>
-                  </motion.button><div className="relative">
+                <div className="flex flex-wrap items-center gap-4">
+                  {/* Search */}
+                  <div className="relative flex-1 min-w-[300px]">
+                    <Search 
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" 
+                      style={{ color: '#808080' }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Search problems..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-11 pr-4 py-3 transition-all outline-none"
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(128, 128, 128, 0.3)',
+                        borderRadius: '0.5rem',
+                        color: '#e0e0e0',
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = '#00ff88'}
+                      onBlur={(e) => e.target.style.borderColor = 'rgba(128, 128, 128, 0.3)'}
+                    />
+                  </div>
+
+                  {/* Tag Filter */}
+                  <div className="relative tag-dropdown-container" style={{ zIndex: 100 }}>
                     <motion.button
                       onClick={() => setShowTagDropdown(!showTagDropdown)}
-                      className="flex items-center space-x-2 bg-purple-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-purple-700 transition-colors"
-                      whileHover={{ scale: 1.05 }}
+                      className="flex items-center gap-2 px-4 py-3 rounded-lg transition-all"
+                      style={{
+                        backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                        border: '1px solid rgba(0, 255, 136, 0.3)',
+                        color: '#00ff88',
+                      }}
+                      whileHover={{ 
+                        scale: 1.05,
+                        backgroundColor: 'rgba(0, 255, 136, 0.2)',
+                      }}
                       whileTap={{ scale: 0.95 }}
                     >
                       <Tag className="w-4 h-4" />
                       <span>{selectedTag === 'all' ? 'All Tags' : selectedTag}</span>
-                    </motion.button><AnimatePresence>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${showTagDropdown ? 'rotate-180' : ''}`} />
+                    </motion.button>
+
+                    <AnimatePresence>
                       {showTagDropdown && (
                         <motion.div
-                          className="absolute top-full left-0 mt-2 bg-gray-800 rounded-lg shadow-xl border border-gray-600 z-50 min-w-48"
+                          className="absolute top-full left-0 mt-2 rounded-lg shadow-xl min-w-48 max-h-96 overflow-y-auto"
+                          style={{
+                            backgroundColor: 'rgba(10, 10, 15, 0.98)',
+                            backdropFilter: 'blur(20px)',
+                            border: '1px solid rgba(0, 255, 136, 0.3)',
+                            zIndex: 1000,
+                          }}
                           initial={{ opacity: 0, y: -10, scale: 0.95 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -10, scale: 0.95 }}
                           transition={{ duration: 0.2 }}
                         >
                           <div className="p-2">
-                            <button
+                            <motion.button
                               onClick={() => { setSelectedTag('all'); setShowTagDropdown(false); }}
-                              className={`w-full text-left px-3 py-2 rounded-md transition-colors text-gray-200 ${
-                                selectedTag === 'all' ? 'bg-purple-600 text-white' : 'hover:bg-gray-700'
-                              }`}
+                              className="w-full text-left px-3 py-2 rounded-md transition-all"
+                              style={{ 
+                                color: '#e0e0e0',
+                                backgroundColor: selectedTag === 'all' ? 'rgba(0, 255, 136, 0.2)' : 'transparent',
+                              }}
+                              whileHover={{ 
+                                backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                                color: '#00ff88'
+                              }}
                             >
                               All Tags
-                            </button>
+                            </motion.button>
                             {uniqueTags.map(tag => (
-                              <button
+                              <motion.button
                                 key={tag}
                                 onClick={() => { setSelectedTag(tag); setShowTagDropdown(false); }}
-                                className={`w-full text-left px-3 py-2 rounded-md transition-colors text-gray-200 ${
-                                  selectedTag === tag ? 'bg-purple-600 text-white' : 'hover:bg-gray-700'
-                                }`}
+                                className="w-full text-left px-3 py-2 rounded-md transition-all"
+                                style={{ 
+                                  color: '#e0e0e0',
+                                  backgroundColor: selectedTag === tag ? 'rgba(0, 255, 136, 0.2)' : 'transparent',
+                                }}
+                                whileHover={{ 
+                                  backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                                  color: '#00ff88'
+                                }}
                               >
                                 {tag}
-                              </button>
+                              </motion.button>
                             ))}
                           </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
-                  </div><select
+                  </div>
+
+                  {/* Difficulty Filter */}
+                  <select
                     value={selectedDifficulty}
                     onChange={(e) => setSelectedDifficulty(e.target.value)}
-                    className="px-4 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    className="px-4 py-3 rounded-lg outline-none cursor-pointer transition-all"
+                    style={{
+                      backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                      border: '1px solid rgba(0, 255, 136, 0.3)',
+                      color: '#00ff88',
+                    }}
                   >
-                    <option value="all">All Difficulties</option>
-                    <option value="easy">Easy</option>
-                    <option value="medium">Medium</option>
-                    <option value="hard">Hard</option>
-                  </select><div className="text-gray-300 font-medium ml-auto">
+                    <option value="all" style={{ backgroundColor: '#0a0a0f', color: '#e0e0e0' }}>All Difficulties</option>
+                    <option value="easy" style={{ backgroundColor: '#0a0a0f', color: '#4ade80' }}>Easy</option>
+                    <option value="medium" style={{ backgroundColor: '#0a0a0f', color: '#fbbf24' }}>Medium</option>
+                    <option value="hard" style={{ backgroundColor: '#0a0a0f', color: '#ef4444' }}>Hard</option>
+                  </select>
+
+                  <div className="text-sm font-medium ml-auto" style={{ color: '#808080' }}>
                     {filteredProblems.length} problems found
                   </div>
-                </div><AnimatePresence>
-                  {showSearchBar && (
-                    <motion.div
-                      className="mt-4"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                          type="text"
-                          placeholder="Search problems by title..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full pl-10 pr-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-700 text-white placeholder-gray-400"
-                          autoFocus
-                        />
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div><motion.div
-                className="bg-gray-800/70 backdrop-blur-lg rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden"
+                </div>
+              </motion.div>              {/* Problems Table */}
+              <motion.div
+                className="rounded-2xl overflow-hidden relative"
+                style={{
+                  backgroundColor: 'rgba(10, 10, 15, 0.8)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(0, 255, 136, 0.2)',
+                  zIndex: 1,
+                }}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gradient-to-r from-gray-700 to-gray-800 border-b border-gray-600">
+                    <thead 
+                      style={{
+                        backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                        borderBottom: '1px solid rgba(0, 255, 136, 0.2)',
+                      }}
+                    >
                       <tr>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-200">#</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-200">Status</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-200">Title</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-200">Difficulty</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-200">Tags</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: '#e0e0e0' }}>
+                          #
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: '#e0e0e0' }}>
+                          Status
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: '#e0e0e0' }}>
+                          Title
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: '#e0e0e0' }}>
+                          Difficulty
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold" style={{ color: '#e0e0e0' }}>
+                          Tags
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {currentProblems.length === 0 ? (
                         <tr>
                           <td colSpan="5" className="px-6 py-12 text-center">
-                            <div className="text-gray-400">
+                            <div style={{ color: '#808080' }}>
                               <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
                               <p className="text-lg">No problems found</p>
                               <p className="text-sm">Try adjusting your search or filters</p>
@@ -578,14 +761,19 @@ function Homepage() {
                           return (
                             <motion.tr
                               key={problem._id}
-                              className="border-b border-gray-700 hover:bg-gray-700/50 transition-all duration-200"
+                              className="transition-all duration-200"
+                              style={{
+                                borderBottom: '1px solid rgba(128, 128, 128, 0.1)',
+                              }}
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ duration: 0.3, delay: index * 0.05 }}
-                              whileHover={{ scale: 1.01 }}
+                              whileHover={{ backgroundColor: 'rgba(0, 255, 136, 0.05)' }}
                             >
                               <td className="px-6 py-4">
-                                <span className="text-gray-300 font-medium">{globalIndex}</span>
+                                <span className="font-medium" style={{ color: '#808080' }}>
+                                  {globalIndex}
+                                </span>
                               </td>
                               <td className="px-6 py-4">
                                 <motion.div
@@ -594,24 +782,31 @@ function Homepage() {
                                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                 >
                                   {isSolved ? (
-                                    <CheckCircle className="w-6 h-6 text-green-500" />
+                                    <CheckCircle className="w-6 h-6" style={{ color: '#22c55e' }} />
                                   ) : (
-                                    <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
+                                    <div 
+                                      className="w-6 h-6 rounded-full"
+                                      style={{ border: '2px solid #808080' }}
+                                    ></div>
                                   )}
                                 </motion.div>
                               </td>
                               <td className="px-6 py-4">
                                 <NavLink
                                   to={`/problem/${problem._id}`}
-                                  className="text-blue-400 hover:text-blue-300 font-medium hover:underline transition-colors"
+                                  className="font-medium hover:underline transition-colors inline-flex items-center gap-2 group"
+                                  style={{ color: '#00ff88' }}
                                 >
                                   {problem.title}
+                                  <ArrowRight 
+                                    className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" 
+                                  />
                                 </NavLink>
                               </td>
                               <td className="px-6 py-4">
-                                <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border ${
-                                  difficultyColors[problem.difficulty] || 'text-gray-400 bg-gray-700 border-gray-600'
-                                }`}>
+                                <span 
+                                  className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border ${getDifficultyColor(problem.difficulty)}`}
+                                >
                                   {problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}
                                 </span>
                               </td>
@@ -624,38 +819,59 @@ function Homepage() {
                       )}
                     </tbody>
                   </table>
-                </div>{totalPages > 1 && (
+                </div>                {/* Pagination */}
+                {totalPages > 1 && (
                   <motion.div
-                    className="px-6 py-4 border-t border-gray-600 bg-gradient-to-r from-gray-700 to-gray-800"
+                    className="px-6 py-4"
+                    style={{
+                      borderTop: '1px solid rgba(0, 255, 136, 0.2)',
+                      backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                    }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5 }}
                   >
                     <div className="flex items-center justify-between">
-                      <div className="text-sm text-gray-300">
+                      <div className="text-sm" style={{ color: '#808080' }}>
                         Showing {indexOfFirstProblem + 1} to {Math.min(indexOfLastProblem, filteredProblems.length)} of {filteredProblems.length} problems
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center gap-2">
                         <motion.button
                           onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                           disabled={currentPage === 1}
-                          className="flex items-center px-3 py-2 text-sm border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-300"
-                          whileHover={{ scale: currentPage === 1 ? 1 : 1.05 }}
+                          className="flex items-center px-3 py-2 text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{
+                            border: '1px solid rgba(128, 128, 128, 0.3)',
+                            color: '#e0e0e0',
+                            backgroundColor: currentPage === 1 ? 'transparent' : 'rgba(0, 255, 136, 0.1)',
+                          }}
+                          whileHover={{ 
+                            scale: currentPage === 1 ? 1 : 1.05,
+                            backgroundColor: currentPage === 1 ? 'transparent' : 'rgba(0, 255, 136, 0.2)',
+                          }}
                           whileTap={{ scale: currentPage === 1 ? 1 : 0.95 }}
                         >
                           <ChevronLeft className="w-4 h-4 mr-1" />
                           Previous
                         </motion.button>
                         
-                        <span className="text-sm text-gray-300 px-4">
+                        <span className="text-sm px-4" style={{ color: '#808080' }}>
                           Page {currentPage} of {totalPages}
                         </span>
                         
                         <motion.button
                           onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                           disabled={currentPage === totalPages}
-                          className="flex items-center px-3 py-2 text-sm border border-gray-600 rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-300"
-                          whileHover={{ scale: currentPage === totalPages ? 1 : 1.05 }}
+                          className="flex items-center px-3 py-2 text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{
+                            border: '1px solid rgba(128, 128, 128, 0.3)',
+                            color: '#e0e0e0',
+                            backgroundColor: currentPage === totalPages ? 'transparent' : 'rgba(0, 255, 136, 0.1)',
+                          }}
+                          whileHover={{ 
+                            scale: currentPage === totalPages ? 1 : 1.05,
+                            backgroundColor: currentPage === totalPages ? 'transparent' : 'rgba(0, 255, 136, 0.2)',
+                          }}
                           whileTap={{ scale: currentPage === totalPages ? 1 : 0.95 }}
                         >
                           Next
@@ -666,39 +882,6 @@ function Homepage() {
                   </motion.div>
                 )}
               </motion.div>
-            </motion.div>
-          )}
-
-          {activeTab === 'explore' && (
-            <motion.div
-              key="explore"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="text-center py-20"
-            >
-              <Compass className="w-16 h-16 text-purple-400 mx-auto mb-6" />
-              <h2 className="text-3xl font-bold text-white mb-4">Explore Section</h2>
-              <p className="text-gray-300 text-lg">Coming Soon! Discover new topics and learning paths.</p>
-            </motion.div>
-          )}
-
-          {activeTab === 'contest' && (
-            <motion.div
-              key="contest"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="text-center py-20"
-            >
-              <Medal className="w-16 h-16 text-orange-400 mx-auto mb-6" />
-              <h2 className="text-3xl font-bold text-white mb-4">Contest Arena</h2>
-              <p className="text-gray-300 text-lg">Coming Soon! Compete with other developers in coding contests.</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </div>
   );

@@ -3,10 +3,12 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import axiosClient from '../utils/axiosClient'
+import { useSelector } from 'react-redux';
 
 function AdminUpload(){
     
     const {problemId}  = useParams();
+    const { user } = useSelector((state) => state.auth);
     
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -67,10 +69,19 @@ function AdminUpload(){
           
         } catch (err) {
           console.error('Upload error:', err);
-          setError('root', {
-            type: 'manual',
-            message: err.response?.data?.message || 'Upload failed. Please try again.'
-          });
+          
+          // Check if it's a 401 error (authentication issue)
+          if (err.response?.status === 401) {
+            setError('root', {
+              type: 'manual',
+              message: `Authentication Error: You need admin privileges to upload videos. Current role: ${user?.role || 'unknown'}. Please ensure you are logged in with an admin account.`
+            });
+          } else {
+            setError('root', {
+              type: 'manual',
+              message: err.response?.data?.message || 'Upload failed. Please try again.'
+            });
+          }
         } finally {
           setUploading(false);
           setUploadProgress(0);

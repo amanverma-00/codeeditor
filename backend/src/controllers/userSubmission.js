@@ -2,6 +2,7 @@ const Problem = require("../models/problem");
 const Submission = require("../models/submission");
 const User = require("../models/user");
 const {getLanguageById,submitBatch,submitToken} = require("../utils/problemUtility");
+const {updateStreak} = require("../utils/streakUtility");
 
 // Constants for validation
 const MAX_CODE_LENGTH = 50000; // 50KB
@@ -158,6 +159,10 @@ const submitCode = async (req,res)=>{
        // Only add to problemSolved if ALL test cases passed
        if(status === 'accepted' && !req.result.problemSolved.includes(problemId)) {
            req.result.problemSolved.push(problemId);
+           
+           // Update streak when problem is solved
+           await updateStreak(req.result);
+           
            await req.result.save();
        }
 

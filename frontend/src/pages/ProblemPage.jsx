@@ -19,7 +19,11 @@ import {
   RotateCcw,
   Terminal,
   Trophy,
-  Zap
+  Zap,
+  Copy,
+  Check,
+  Video,
+  PlayCircle
 } from 'lucide-react';
 import axiosClient from "../utils/axiosClient"
 import SubmissionHistory from "../components/SubmissionHistory"
@@ -60,6 +64,9 @@ const ProblemPage = () => {
   const [submitResult, setSubmitResult] = useState(null);
   const [activeLeftTab, setActiveLeftTab] = useState('description');
   const [activeRightTab, setActiveRightTab] = useState('code');
+  const [copiedIndex, setCopiedIndex] = useState(null);
+  const [videoSolution, setVideoSolution] = useState(null);
+  const [videoLoading, setVideoLoading] = useState(false);
   const editorRef = useRef(null);
   const navigate = useNavigate();
   let {problemId}  = useParams();
@@ -136,6 +143,28 @@ const ProblemPage = () => {
     };
 
     fetchProblem();
+  }, [problemId]);
+
+  useEffect(() => {
+    const fetchVideo = async () => {
+      if (!problemId) return;
+      
+      setVideoLoading(true);
+      try {
+        const response = await axiosClient.get(`/video/${problemId}`);
+        setVideoSolution(response.data.video);
+      } catch (error) {
+        // Video not found is okay - not all problems have videos
+        if (error.response?.status !== 404) {
+          console.error('Error fetching video:', error);
+        }
+        setVideoSolution(null);
+      } finally {
+        setVideoLoading(false);
+      }
+    };
+
+    fetchVideo();
   }, [problemId]);
 
   useEffect(() => {
@@ -231,24 +260,49 @@ const ProblemPage = () => {
   };
 
   const getDifficultyBadge = (difficulty) => {
+    const baseStyle = 'inline-flex px-3 py-1 text-sm font-medium rounded-full';
     switch (difficulty) {
-      case 'easy': return 'bg-green-500/20 border-green-500/50 text-green-400';
-      case 'medium': return 'bg-yellow-500/20 border-yellow-500/50 text-yellow-400';
-      case 'hard': return 'bg-red-500/20 border-red-500/50 text-red-400';
-      default: return 'bg-gray-500/20 border-gray-500/50 text-gray-400';
+      case 'easy': 
+        return `${baseStyle} bg-green-500/10 border border-green-500/30 text-green-400`;
+      case 'medium': 
+        return `${baseStyle} bg-yellow-500/10 border border-yellow-500/30 text-yellow-400`;
+      case 'hard': 
+        return `${baseStyle} bg-red-500/10 border border-red-500/30 text-red-400`;
+      default: 
+        return `${baseStyle} bg-gray-500/10 border border-gray-500/30 text-gray-400`;
+    }
+  };
+
+  const handleCopyCode = async (code, index) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy code:', err);
     }
   };
 
   if (loading && !problem) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 flex justify-center items-center">
+      <div 
+        className="min-h-screen flex justify-center items-center"
+        style={{
+          fontFamily: "'IBM Plex Mono', 'Fira Code', monospace",
+          backgroundColor: '#0a0a0f',
+        }}
+      >
         <div className="flex flex-col items-center space-y-4">
           <motion.div
-            className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full"
+            className="w-12 h-12 rounded-full"
+            style={{
+              border: '4px solid rgba(0, 255, 136, 0.3)',
+              borderTopColor: '#00ff88',
+            }}
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
-          <p className="text-gray-300 text-lg">Loading problem...</p>
+          <p className="text-lg" style={{ color: '#e0e0e0' }}>Loading problem...</p>
         </div>
       </div>
     );
@@ -256,21 +310,36 @@ const ProblemPage = () => {
 
   if (!loading && !problem) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 flex justify-center items-center">
+      <div 
+        className="min-h-screen flex justify-center items-center"
+        style={{
+          fontFamily: "'IBM Plex Mono', 'Fira Code', monospace",
+          backgroundColor: '#0a0a0f',
+        }}
+      >
         <div className="flex flex-col items-center space-y-4">
           <motion.div
-            className="w-16 h-16 bg-red-500/20 border border-red-500/50 rounded-full flex items-center justify-center"
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+            }}
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <XCircle className="w-8 h-8 text-red-400" />
+            <XCircle className="w-8 h-8" style={{ color: '#ef4444' }} />
           </motion.div>
-          <p className="text-red-400 text-lg font-semibold">Problem not found</p>
-          <p className="text-gray-400 text-sm">The problem you're looking for doesn't exist or failed to load.</p>
+          <p className="text-lg font-semibold" style={{ color: '#ef4444' }}>Problem not found</p>
+          <p className="text-sm" style={{ color: '#808080' }}>The problem you're looking for doesn't exist or failed to load.</p>
           <motion.button
             onClick={() => navigate('/home')}
-            className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            className="mt-4 px-6 py-2 rounded-lg transition-all"
+            style={{
+              backgroundColor: '#00ff88',
+              color: '#0a0a0f',
+              fontWeight: '600',
+            }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -282,42 +351,95 @@ const ProblemPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900"><motion.header 
-        className="bg-gray-800/80 backdrop-blur-lg shadow-lg border-b border-gray-700/50 sticky top-0 z-50"
+    <div 
+      className="min-h-screen text-[#e0e0e0]"
+      style={{
+        fontFamily: "'IBM Plex Mono', 'Fira Code', monospace",
+        backgroundColor: '#0a0a0f',
+      }}
+    >
+      {/* Animated grid background */}
+      <div 
+        className="fixed inset-0"
+        style={{
+          opacity: 0.03,
+          backgroundImage: `
+            linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px',
+        }}
+      />
+
+      {/* Scanline effect */}
+      <div 
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          zIndex: 50,
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px)',
+        }}
+      />
+
+      <motion.header 
+        className="sticky top-0 px-8 py-6"
+        style={{ 
+          zIndex: 40,
+          backgroundColor: 'rgba(10, 10, 15, 0.8)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(0, 255, 136, 0.1)',
+        }}
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <motion.button
-                onClick={() => navigate('/home')}
-                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ArrowLeft className="w-5 h-5" />
-                <span>Back to Problems</span>
-              </motion.button>
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <motion.button
+            onClick={() => navigate('/home')}
+            className="flex items-center gap-2 transition-all"
+            style={{ color: '#808080' }}
+            whileHover={{ scale: 1.05, color: '#00ff88' }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Problems</span>
+          </motion.button>
+          
+          <div className="flex items-center gap-3">
+            <div 
+              className="w-8 h-8 rounded-xl flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(135deg, #00ff88 0%, #00cc70 100%)',
+              }}
+            >
+              <Code className="w-5 h-5" style={{ color: '#0a0a0f' }} />
             </div>
-            
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Code className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                CodeOps
-              </span>
-            </div>
+            <span 
+              className="text-xl font-bold"
+              style={{ 
+                fontFamily: "'Orbitron', sans-serif",
+                color: '#e0e0e0',
+              }}
+            >
+              CODEOPS
+            </span>
           </div>
         </div>
-      </motion.header><div className="h-[calc(100vh-80px)] flex"><motion.div 
-          className="w-1/2 flex flex-col border-r border-gray-700/50"
+      </motion.header>
+
+      <div className="h-[calc(100vh-80px)] flex gap-4 px-8 py-6" style={{ position: 'relative', zIndex: 10 }}>
+        <motion.div 
+          className="w-1/2 flex flex-col rounded-2xl overflow-hidden"
+          style={{
+            backgroundColor: 'rgba(10, 10, 15, 0.8)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(0, 255, 136, 0.2)',
+          }}
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-        ><div className="flex items-center bg-gray-800/70 border-b border-gray-700/50 px-6">
+        >
+
+          <div className="flex items-center px-6" style={{ borderBottom: '1px solid rgba(0, 255, 136, 0.1)' }}>
             {[
               { id: 'description', label: 'Description', icon: FileText },
               { id: 'solutions', label: 'Solutions', icon: Code },
@@ -329,12 +451,17 @@ const ProblemPage = () => {
                 <motion.button
                   key={tab.id}
                   onClick={() => setActiveLeftTab(tab.id)}
-                  className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
-                    activeLeftTab === tab.id
-                      ? 'border-blue-500 text-blue-400'
-                      : 'border-transparent text-gray-400 hover:text-gray-300'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
+                  className="flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all"
+                  style={{
+                    borderBottom: activeLeftTab === tab.id ? '2px solid #00ff88' : '2px solid transparent',
+                    color: activeLeftTab === tab.id ? '#00ff88' : '#808080',
+                    backgroundColor: activeLeftTab === tab.id ? 'rgba(0, 255, 136, 0.05)' : 'transparent',
+                  }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    backgroundColor: activeLeftTab === tab.id ? 'rgba(0, 255, 136, 0.05)' : 'rgba(0, 255, 136, 0.02)',
+                    color: '#00ff88',
+                  }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <IconComponent className="w-4 h-4" />
@@ -342,7 +469,9 @@ const ProblemPage = () => {
                 </motion.button>
               );
             })}
-          </div><div className="flex-1 overflow-y-auto p-6 bg-gray-800/30">
+          </div>
+
+<div className="flex-1 overflow-y-auto p-6">
             {problem ? (
               <>
                 {activeLeftTab === 'description' && (
@@ -350,50 +479,73 @@ const ProblemPage = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
-                  ><div className="mb-8">
+                  >
+
+                    <div className="mb-8">
                       <div className="flex items-center gap-4 mb-4">
-                        <h1 className="text-2xl font-bold text-white">{problem.title || 'Untitled Problem'}</h1>
+                        <h1 className="text-2xl font-bold" style={{ color: '#e0e0e0' }}>{problem.title || 'Untitled Problem'}</h1>
                         <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border ${getDifficultyBadge(problem.difficulty || 'easy')}`}>
                           {(problem.difficulty || 'easy').charAt(0).toUpperCase() + (problem.difficulty || 'easy').slice(1)}
                         </span>
                         {problem.tags && (
-                          <span className="inline-flex px-3 py-1 text-sm font-medium bg-blue-500/20 border border-blue-500/50 text-blue-300 rounded-full">
+                          <span className="inline-flex px-3 py-1 text-sm font-medium rounded-full" style={{
+                            backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                            border: '1px solid rgba(0, 255, 136, 0.2)',
+                            color: '#00ff88',
+                          }}>
                             {Array.isArray(problem.tags) ? problem.tags.join(', ') : problem.tags}
                           </span>
                         )}
                       </div>
-                    </div><div className="mb-8">
+                    </div>
+
+                    <div className="mb-8">
                       <div className="prose prose-invert max-w-none">
-                        <div className="text-gray-300 text-base leading-relaxed whitespace-pre-wrap">
+                        <div className="text-base leading-relaxed whitespace-pre-wrap" style={{ color: '#b0b0b0' }}>
                           {problem.description || 'No description available.'}
                         </div>
                       </div>
-                    </div>{problem.visibleTestCases && problem.visibleTestCases.length > 0 && (
+                    </div>
+
+                    {problem.visibleTestCases && problem.visibleTestCases.length > 0 && (
                       <div className="mb-8">
-                        <h3 className="text-lg font-semibold text-white mb-6">Examples</h3>
+                        <h3 className="text-lg font-semibold mb-6" style={{ color: '#e0e0e0' }}>Examples</h3>
                         <div className="space-y-6">
                           {problem.visibleTestCases.map((example, index) => (
                             <motion.div 
                               key={index} 
-                              className="bg-gray-700/50 border border-gray-600/50 rounded-lg p-6"
+                              className="rounded-lg p-6"
+                              style={{
+                                backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                                border: '1px solid rgba(0, 255, 136, 0.2)',
+                              }}
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ duration: 0.3, delay: index * 0.1 }}
                             >
-                              <h4 className="font-semibold text-white mb-4">Example {index + 1}</h4>
+                              <h4 className="font-semibold mb-4" style={{ color: '#00ff88' }}>Example {index + 1}</h4>
                               <div className="space-y-3">
-                                <div className="bg-gray-800/50 p-3 rounded border-l-4 border-blue-500">
-                                  <span className="text-blue-400 font-medium text-sm">Input: </span>
-                                  <pre className="text-gray-300 font-mono text-sm whitespace-pre-wrap inline">{example.input || 'No input'}</pre>
+                                <div className="p-3 rounded" style={{ 
+                                  backgroundColor: 'rgba(10, 10, 15, 0.6)', 
+                                  borderLeft: '4px solid #00ff88' 
+                                }}>
+                                  <span className="font-medium text-sm" style={{ color: '#00ff88' }}>Input: </span>
+                                  <pre className="font-mono text-sm whitespace-pre-wrap inline" style={{ color: '#e0e0e0' }}>{example.input || 'No input'}</pre>
                                 </div>
-                                <div className="bg-gray-800/50 p-3 rounded border-l-4 border-green-500">
-                                  <span className="text-green-400 font-medium text-sm">Output: </span>
-                                  <span className="text-gray-300 font-mono text-sm">{example.output || 'No output'}</span>
+                                <div className="p-3 rounded" style={{ 
+                                  backgroundColor: 'rgba(10, 10, 15, 0.6)', 
+                                  borderLeft: '4px solid #00ff88' 
+                                }}>
+                                  <span className="font-medium text-sm" style={{ color: '#00ff88' }}>Output: </span>
+                                  <span className="font-mono text-sm" style={{ color: '#e0e0e0' }}>{example.output || 'No output'}</span>
                                 </div>
                                 {example.explanation && (
-                                  <div className="bg-gray-800/50 p-3 rounded border-l-4 border-purple-500">
-                                    <span className="text-purple-400 font-medium text-sm">Explanation: </span>
-                                    <span className="text-gray-300 text-sm">{example.explanation}</span>
+                                  <div className="p-3 rounded" style={{ 
+                                    backgroundColor: 'rgba(10, 10, 15, 0.6)', 
+                                    borderLeft: '4px solid rgba(0, 255, 136, 0.5)' 
+                                  }}>
+                                    <span className="font-medium text-sm" style={{ color: '#00ff88' }}>Explanation: </span>
+                                    <span className="text-sm" style={{ color: '#b0b0b0' }}>{example.explanation}</span>
                                   </div>
                                 )}
                               </div>
@@ -411,26 +563,115 @@ const ProblemPage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <h2 className="text-xl font-bold mb-6 text-white">Solutions</h2>
+                    <h2 className="text-xl font-bold mb-6" style={{ color: '#e0e0e0' }}>Solutions</h2>
                     <div className="space-y-6">
+                      
+                      {/* Video Solution Section */}
+                      {videoLoading ? (
+                        <motion.div 
+                          className="rounded-lg p-6 text-center"
+                          style={{
+                            backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                            border: '1px solid rgba(0, 255, 136, 0.2)',
+                          }}
+                        >
+                          <p style={{ color: '#808080' }}>Loading video solution...</p>
+                        </motion.div>
+                      ) : videoSolution ? (
+                        <motion.div 
+                          className="rounded-lg overflow-hidden"
+                          style={{
+                            backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                            border: '1px solid rgba(0, 255, 136, 0.2)',
+                          }}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <div className="px-6 py-3 flex items-center gap-3" style={{ 
+                            backgroundColor: 'rgba(0, 255, 136, 0.1)', 
+                            borderBottom: '1px solid rgba(0, 255, 136, 0.2)' 
+                          }}>
+                            <Video className="w-5 h-5" style={{ color: '#00ff88' }} />
+                            <h3 className="font-semibold" style={{ color: '#00ff88' }}>Video Solution</h3>
+                            <span className="text-sm ml-auto" style={{ color: '#808080' }}>
+                              Duration: {Math.floor(videoSolution.duration / 60)}:{String(Math.floor(videoSolution.duration % 60)).padStart(2, '0')}
+                            </span>
+                          </div>
+                          <div className="p-6">
+                            <div className="relative rounded-lg overflow-hidden" style={{ backgroundColor: '#000' }}>
+                              <video 
+                                controls 
+                                className="w-full"
+                                style={{ maxHeight: '400px' }}
+                                poster={videoSolution.thumbnailUrl}
+                              >
+                                <source src={videoSolution.secureUrl} type="video/mp4" />
+                                Your browser does not support the video tag.
+                              </video>
+                            </div>
+                            <p className="text-sm mt-3" style={{ color: '#808080' }}>
+                              Uploaded: {new Date(videoSolution.uploadedAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </motion.div>
+                      ) : null}
+
+                      {/* Code Solutions Section */}
                       {problem.referenceSolution?.map((solution, index) => (
                         <motion.div 
                           key={index} 
-                          className="bg-gray-700/50 border border-gray-600/50 rounded-lg overflow-hidden"
+                          className="rounded-lg overflow-hidden"
+                          style={{
+                            backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                            border: '1px solid rgba(0, 255, 136, 0.2)',
+                          }}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.3, delay: index * 0.1 }}
                         >
-                          <div className="bg-gray-600/50 px-6 py-3 border-b border-gray-600/50">
-                            <h3 className="font-semibold text-white">{problem?.title} - {solution?.language}</h3>
+                          <div className="px-6 py-3 flex items-center justify-between" style={{ 
+                            backgroundColor: 'rgba(0, 255, 136, 0.1)', 
+                            borderBottom: '1px solid rgba(0, 255, 136, 0.2)' 
+                          }}>
+                            <h3 className="font-semibold" style={{ color: '#00ff88' }}>{problem?.title} - {solution?.language}</h3>
+                            <motion.button
+                              onClick={() => handleCopyCode(solution?.completeCode, index)}
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all"
+                              style={{
+                                backgroundColor: copiedIndex === index ? 'rgba(0, 255, 136, 0.2)' : 'rgba(0, 255, 136, 0.1)',
+                                border: '1px solid rgba(0, 255, 136, 0.3)',
+                                color: copiedIndex === index ? '#00ff88' : '#e0e0e0'
+                              }}
+                              whileHover={{ 
+                                scale: 1.05,
+                                backgroundColor: 'rgba(0, 255, 136, 0.2)'
+                              }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              {copiedIndex === index ? (
+                                <>
+                                  <Check className="w-4 h-4" />
+                                  <span className="text-sm">Copied!</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-4 h-4" />
+                                  <span className="text-sm">Copy Code</span>
+                                </>
+                              )}
+                            </motion.button>
                           </div>
                           <div className="p-6">
-                            <pre className="bg-gray-800/70 p-4 rounded text-sm overflow-x-auto text-gray-300">
+                            <pre className="p-4 rounded text-sm overflow-x-auto" style={{ 
+                              backgroundColor: 'rgba(10, 10, 15, 0.8)', 
+                              color: '#e0e0e0' 
+                            }}>
                               <code>{solution?.completeCode}</code>
                             </pre>
                           </div>
                         </motion.div>
-                      )) || <p className="text-gray-400">Solutions will be available after you solve the problem.</p>}
+                      )) || <p style={{ color: '#808080' }}>Solutions will be available after you solve the problem.</p>}
                     </div>
                   </motion.div>
                 )}
@@ -441,8 +682,11 @@ const ProblemPage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <h2 className="text-xl font-bold mb-6 text-white">My Submissions</h2>
-                    <div className="bg-gray-700/50 rounded-lg p-6">
+                    <h2 className="text-xl font-bold mb-6" style={{ color: '#e0e0e0' }}>My Submissions</h2>
+                    <div className="rounded-lg p-6" style={{
+                      backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                      border: '1px solid rgba(0, 255, 136, 0.2)',
+                    }}>
                       <SubmissionHistory problemId={problemId} />
                     </div>
                   </motion.div>
@@ -455,8 +699,11 @@ const ProblemPage = () => {
                     transition={{ duration: 0.5 }}
                     className="prose prose-invert max-w-none"
                   >
-                    <h2 className="text-xl font-bold mb-6 text-white">Chat with AI</h2>
-                    <div className="bg-gray-700/50 rounded-lg p-6">
+                    <h2 className="text-xl font-bold mb-6" style={{ color: '#e0e0e0' }}>Chat with AI</h2>
+                    <div className="rounded-lg p-6" style={{
+                      backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                      border: '1px solid rgba(0, 255, 136, 0.2)',
+                    }}>
                       <ChatAi problem={problem}></ChatAi>
                     </div>
                   </motion.div>
@@ -466,25 +713,38 @@ const ProblemPage = () => {
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
                   <motion.div
-                    className="w-16 h-16 bg-gray-700/50 border border-gray-600/50 rounded-full flex items-center justify-center mx-auto mb-4"
+                    className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                    style={{
+                      backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                      border: '1px solid rgba(0, 255, 136, 0.3)',
+                    }}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <FileText className="w-8 h-8 text-gray-400" />
+                    <FileText className="w-8 h-8" style={{ color: '#00ff88' }} />
                   </motion.div>
-                  <p className="text-gray-400 text-lg">No problem data available</p>
-                  <p className="text-gray-500 text-sm">Please check your connection and try again.</p>
+                  <p className="text-lg" style={{ color: '#808080' }}>No problem data available</p>
+                  <p className="text-sm" style={{ color: '#606060' }}>Please check your connection and try again.</p>
                 </div>
               </div>
             )}
         </div>
-        </motion.div><motion.div 
-          className="w-1/2 flex flex-col"
+        </motion.div>
+
+        <motion.div 
+          className="w-1/2 flex flex-col rounded-2xl overflow-hidden"
+          style={{
+            backgroundColor: 'rgba(10, 10, 15, 0.8)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(0, 255, 136, 0.2)',
+          }}
           initial={{ x: 50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-        ><div className="flex items-center bg-gray-800/70 border-b border-gray-700/50 px-6">
+        >
+
+          <div className="flex items-center px-6" style={{ borderBottom: '1px solid rgba(0, 255, 136, 0.1)' }}>
             {[
               { id: 'code', label: 'Code', icon: Code },
               { id: 'testcase', label: 'Test Cases', icon: Play },
@@ -495,12 +755,17 @@ const ProblemPage = () => {
                 <motion.button
                   key={tab.id}
                   onClick={() => setActiveRightTab(tab.id)}
-                  className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${
-                    activeRightTab === tab.id
-                      ? 'border-green-500 text-green-400'
-                      : 'border-transparent text-gray-400 hover:text-gray-300'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
+                  className="flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all"
+                  style={{
+                    borderBottom: activeRightTab === tab.id ? '2px solid #00ff88' : '2px solid transparent',
+                    color: activeRightTab === tab.id ? '#00ff88' : '#808080',
+                    backgroundColor: activeRightTab === tab.id ? 'rgba(0, 255, 136, 0.05)' : 'transparent',
+                  }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    backgroundColor: activeRightTab === tab.id ? 'rgba(0, 255, 136, 0.05)' : 'rgba(0, 255, 136, 0.02)',
+                    color: '#00ff88',
+                  }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <IconComponent className="w-4 h-4" />
@@ -508,32 +773,39 @@ const ProblemPage = () => {
                 </motion.button>
               );
             })}
-          </div><div className="flex-1 flex flex-col bg-gray-800/30">
+          </div>
+
+          <div className="flex-1 flex flex-col">
             {activeRightTab === 'code' && (
               <motion.div 
                 className="flex-1 flex flex-col"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-              ><div className="flex justify-between items-center p-4 border-b border-gray-700/50 bg-gray-800/50">
+              >
+
+                <div className="flex justify-between items-center p-4" style={{ borderBottom: '1px solid rgba(0, 255, 136, 0.1)' }}>
                   <div className="flex gap-2">
                     {['javascript', 'java', 'cpp'].map((lang) => (
                       <motion.button
                         key={lang}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                          selectedLanguage === lang
-                            ? 'bg-blue-600 text-white shadow-lg'
-                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                        }`}
+                        className="px-3 py-1.5 text-sm font-medium rounded-lg transition-all"
+                        style={{
+                          backgroundColor: selectedLanguage === lang ? '#00ff88' : 'rgba(0, 255, 136, 0.1)',
+                          color: selectedLanguage === lang ? '#0a0a0f' : '#00ff88',
+                          border: selectedLanguage === lang ? 'none' : '1px solid rgba(0, 255, 136, 0.2)',
+                        }}
                         onClick={() => handleLanguageChange(lang)}
-                        whileHover={{ scale: 1.05 }}
+                        whileHover={{ scale: 1.05, backgroundColor: selectedLanguage === lang ? '#00ff88' : 'rgba(0, 255, 136, 0.15)' }}
                         whileTap={{ scale: 0.95 }}
                       >
                         {displayNameMap[lang]}
                       </motion.button>
                     ))}
                   </div>
-                </div><div className="flex-1 border border-gray-700/50 rounded-lg m-4 overflow-hidden">
+                </div>
+
+                <div className="flex-1 rounded-lg m-4 overflow-hidden" style={{ border: '1px solid rgba(0, 255, 136, 0.2)' }}>
                   <Editor
                     height="100%"
                     language={getLanguageForMonaco(selectedLanguage)}
@@ -564,12 +836,18 @@ const ProblemPage = () => {
                       fontFamily: 'JetBrains Mono, Consolas, Monaco, monospace',
                     }}
                   />
-                </div><div className="p-4 border-t border-gray-700/50 bg-gray-800/50 flex justify-between">
+                </div>
+
+                <div className="p-4 flex justify-between" style={{ borderTop: '1px solid rgba(0, 255, 136, 0.1)' }}>
                   <div className="flex gap-2">
                     <motion.button 
-                      className="flex items-center space-x-2 px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-all duration-200"
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all"
+                      style={{
+                        color: '#808080',
+                        border: '1px solid rgba(0, 255, 136, 0.2)',
+                      }}
                       onClick={() => setActiveRightTab('testcase')}
-                      whileHover={{ scale: 1.05 }}
+                      whileHover={{ scale: 1.05, backgroundColor: 'rgba(0, 255, 136, 0.1)', color: '#00ff88' }}
                       whileTap={{ scale: 0.95 }}
                     >
                       <Terminal className="w-4 h-4" />
@@ -578,9 +856,13 @@ const ProblemPage = () => {
                   </div>
                   <div className="flex gap-3">
                     <motion.button
-                      className={`flex items-center space-x-2 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all duration-200 shadow-lg ${
-                        loading ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
+                      className="flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-all"
+                      style={{
+                        backgroundColor: loading ? 'rgba(0, 255, 136, 0.5)' : '#00ff88',
+                        color: '#0a0a0f',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        opacity: loading ? 0.5 : 1,
+                      }}
                       onClick={handleRun}
                       disabled={loading}
                       whileHover={{ scale: loading ? 1 : 1.05 }}
@@ -588,7 +870,11 @@ const ProblemPage = () => {
                     >
                       {loading ? (
                         <motion.div
-                          className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                          className="w-4 h-4 rounded-full"
+                          style={{
+                            border: '2px solid #0a0a0f',
+                            borderTopColor: 'transparent',
+                          }}
                           animate={{ rotate: 360 }}
                           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                         />
@@ -598,9 +884,13 @@ const ProblemPage = () => {
                       <span>Run</span>
                     </motion.button>
                     <motion.button
-                      className={`flex items-center space-x-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all duration-200 shadow-lg ${
-                        loading ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
+                      className="flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-all"
+                      style={{
+                        backgroundColor: loading ? 'rgba(0, 255, 136, 0.7)' : 'rgba(0, 255, 136, 0.8)',
+                        color: '#0a0a0f',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        opacity: loading ? 0.5 : 1,
+                      }}
                       onClick={handleSubmitCode}
                       disabled={loading}
                       whileHover={{ scale: loading ? 1 : 1.05 }}
@@ -608,7 +898,11 @@ const ProblemPage = () => {
                     >
                       {loading ? (
                         <motion.div
-                          className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                          className="w-4 h-4 rounded-full"
+                          style={{
+                            border: '2px solid #0a0a0f',
+                            borderTopColor: 'transparent',
+                          }}
                           animate={{ rotate: 360 }}
                           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                         />
@@ -629,32 +923,32 @@ const ProblemPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <h3 className="text-lg font-semibold text-white mb-6">Test Results</h3>
+                <h3 className="text-lg font-semibold mb-6" style={{ color: '#e0e0e0' }}>Test Results</h3>
                 {runResult ? (
                   <motion.div 
-                    className={`p-6 rounded-lg border ${
-                      runResult.success 
-                        ? 'bg-green-900/30 border-green-500/50 text-green-300' 
-                        : 'bg-red-900/30 border-red-500/50 text-red-300'
-                    }`}
+                    className="p-6 rounded-lg"
+                    style={{
+                      backgroundColor: runResult.success ? 'rgba(0, 255, 136, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                      border: runResult.success ? '1px solid rgba(0, 255, 136, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
+                    }}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3 }}
                   >
                     {runResult.success ? (
                       <div>
-                        <div className="flex items-center space-x-2 mb-4">
-                          <CheckCircle className="w-6 h-6 text-green-400" />
-                          <h4 className="text-xl font-bold text-green-400">All test cases passed!</h4>
+                        <div className="flex items-center gap-2 mb-4">
+                          <CheckCircle className="w-6 h-6" style={{ color: '#00ff88' }} />
+                          <h4 className="text-xl font-bold" style={{ color: '#00ff88' }}>All test cases passed!</h4>
                         </div>
                         <div className="grid grid-cols-2 gap-4 mb-6">
-                          <div className="bg-gray-800/50 p-3 rounded-lg">
-                            <span className="text-gray-400 text-sm">Runtime:</span>
-                            <p className="text-green-300 font-semibold">{runResult.runtime + " sec"}</p>
+                          <div className="p-3 rounded-lg" style={{ backgroundColor: 'rgba(10, 10, 15, 0.6)' }}>
+                            <span className="text-sm" style={{ color: '#808080' }}>Runtime:</span>
+                            <p className="font-semibold" style={{ color: '#00ff88' }}>{runResult.runtime + " sec"}</p>
                           </div>
-                          <div className="bg-gray-800/50 p-3 rounded-lg">
-                            <span className="text-gray-400 text-sm">Memory:</span>
-                            <p className="text-green-300 font-semibold">{runResult.memory + " KB"}</p>
+                          <div className="p-3 rounded-lg" style={{ backgroundColor: 'rgba(10, 10, 15, 0.6)' }}>
+                            <span className="text-sm" style={{ color: '#808080' }}>Memory:</span>
+                            <p className="font-semibold" style={{ color: '#00ff88' }}>{runResult.memory + " KB"}</p>
                           </div>
                         </div>
                         
@@ -663,77 +957,88 @@ const ProblemPage = () => {
                             runResult.testCases.map((tc, i) => (
                               <motion.div 
                                 key={i} 
-                                className="bg-gray-700/50 border border-gray-600/50 rounded-lg p-4"
+                                className="rounded-lg p-4"
+                                style={{
+                                  backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                                  border: '1px solid rgba(0, 255, 136, 0.2)',
+                                }}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.3, delay: i * 0.1 }}
                               >
                                 <div className="font-mono text-sm space-y-2">
-                                  <div className="flex items-center space-x-2">
-                                    <span className="text-gray-400 font-medium">Input:</span>
-                                    <span className="text-blue-300">{tc.stdin}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium" style={{ color: '#808080' }}>Input:</span>
+                                    <span style={{ color: '#00ff88' }}>{tc.stdin}</span>
                                   </div>
-                                  <div className="flex items-center space-x-2">
-                                    <span className="text-gray-400 font-medium">Expected:</span>
-                                    <span className="text-yellow-300">{tc.expected_output}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium" style={{ color: '#808080' }}>Expected:</span>
+                                    <span style={{ color: '#e0e0e0' }}>{tc.expected_output}</span>
                                   </div>
-                                  <div className="flex items-center space-x-2">
-                                    <span className="text-gray-400 font-medium">Output:</span>
-                                    <span className="text-green-300">{tc.stdout}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium" style={{ color: '#808080' }}>Output:</span>
+                                    <span style={{ color: '#00ff88' }}>{tc.stdout}</span>
                                   </div>
-                                  <div className="flex items-center space-x-2">
-                                    <CheckCircle className="w-4 h-4 text-green-400" />
-                                    <span className="text-green-400 font-medium">Passed</span>
+                                  <div className="flex items-center gap-2">
+                                    <CheckCircle className="w-4 h-4" style={{ color: '#00ff88' }} />
+                                    <span className="font-medium" style={{ color: '#00ff88' }}>Passed</span>
                                   </div>
                                 </div>
                               </motion.div>
                             ))
                           ) : (
-                            <div className="bg-gray-700/50 border border-gray-600/50 rounded-lg p-4">
-                              <p className="text-gray-400">No test case results available</p>
+                            <div className="rounded-lg p-4" style={{
+                              backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                              border: '1px solid rgba(0, 255, 136, 0.2)',
+                            }}>
+                              <p style={{ color: '#808080' }}>No test case results available</p>
                             </div>
                           )}
                         </div>
                       </div>
                     ) : (
                       <div>
-                        <div className="flex items-center space-x-2 mb-4">
-                          <XCircle className="w-6 h-6 text-red-400" />
-                          <h4 className="text-xl font-bold text-red-400">Error</h4>
+                        <div className="flex items-center gap-2 mb-4">
+                          <XCircle className="w-6 h-6" style={{ color: '#ef4444' }} />
+                          <h4 className="text-xl font-bold" style={{ color: '#ef4444' }}>Error</h4>
                         </div>
                         <div className="space-y-4">
                           {runResult.testCases && runResult.testCases.length > 0 ? (
                             runResult.testCases.map((tc, i) => (
                             <motion.div 
                               key={i} 
-                              className="bg-gray-700/50 border border-gray-600/50 rounded-lg p-4"
+                              className="rounded-lg p-4"
+                              style={{
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                border: '1px solid rgba(239, 68, 68, 0.2)',
+                              }}
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ duration: 0.3, delay: i * 0.1 }}
                             >
                               <div className="font-mono text-sm space-y-2">
-                                <div className="flex items-center space-x-2">
-                                  <span className="text-gray-400 font-medium">Input:</span>
-                                  <span className="text-blue-300">{tc.stdin}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium" style={{ color: '#808080' }}>Input:</span>
+                                  <span style={{ color: '#00ff88' }}>{tc.stdin}</span>
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                  <span className="text-gray-400 font-medium">Expected:</span>
-                                  <span className="text-yellow-300">{tc.expected_output}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium" style={{ color: '#808080' }}>Expected:</span>
+                                  <span style={{ color: '#e0e0e0' }}>{tc.expected_output}</span>
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                  <span className="text-gray-400 font-medium">Output:</span>
-                                  <span className="text-red-300">{tc.stdout}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium" style={{ color: '#808080' }}>Output:</span>
+                                  <span style={{ color: '#ef4444' }}>{tc.stdout}</span>
                                 </div>
-                                <div className="flex items-center space-x-2">
+                                <div className="flex items-center gap-2">
                                   {tc.status_id == 3 ? (
                                     <>
-                                      <CheckCircle className="w-4 h-4 text-green-400" />
-                                      <span className="text-green-400 font-medium">Passed</span>
+                                      <CheckCircle className="w-4 h-4" style={{ color: '#00ff88' }} />
+                                      <span className="font-medium" style={{ color: '#00ff88' }}>Passed</span>
                                     </>
                                   ) : (
                                     <>
-                                      <XCircle className="w-4 h-4 text-red-400" />
-                                      <span className="text-red-400 font-medium">Failed</span>
+                                      <XCircle className="w-4 h-4" style={{ color: '#ef4444' }} />
+                                      <span className="font-medium" style={{ color: '#ef4444' }}>Failed</span>
                                     </>
                                   )}
                                 </div>
@@ -741,8 +1046,11 @@ const ProblemPage = () => {
                             </motion.div>
                           ))
                           ) : (
-                            <div className="bg-gray-700/50 border border-gray-600/50 rounded-lg p-4">
-                              <p className="text-red-400">Error: {runResult.error || 'No test case results available'}</p>
+                            <div className="rounded-lg p-4" style={{
+                              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                              border: '1px solid rgba(239, 68, 68, 0.2)',
+                            }}>
+                              <p style={{ color: '#ef4444' }}>Error: {runResult.error || 'No test case results available'}</p>
                             </div>
                           )}
                         </div>
@@ -751,9 +1059,9 @@ const ProblemPage = () => {
                   </motion.div>
                 ) : (
                   <div className="text-center py-12">
-                    <Terminal className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                    <p className="text-gray-400 text-lg">Click "Run" to test your code</p>
-                    <p className="text-gray-500 text-sm">Test your solution with the example test cases</p>
+                    <Terminal className="w-16 h-16 mx-auto mb-4" style={{ color: '#606060' }} />
+                    <p className="text-lg" style={{ color: '#808080' }}>Click "Run" to test your code</p>
+                    <p className="text-sm" style={{ color: '#606060' }}>Test your solution with the example test cases</p>
                   </div>
                 )}
               </motion.div>
@@ -766,76 +1074,76 @@ const ProblemPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <h3 className="text-lg font-semibold text-white mb-6">Submission Result</h3>
+                <h3 className="text-lg font-semibold mb-6" style={{ color: '#e0e0e0' }}>Submission Result</h3>
                 {submitResult ? (
                   <motion.div 
-                    className={`p-6 rounded-lg border ${
-                      submitResult.accepted 
-                        ? 'bg-green-900/30 border-green-500/50' 
-                        : 'bg-red-900/30 border-red-500/50'
-                    }`}
+                    className="p-6 rounded-lg"
+                    style={{
+                      backgroundColor: submitResult.accepted ? 'rgba(0, 255, 136, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                      border: submitResult.accepted ? '1px solid rgba(0, 255, 136, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
+                    }}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3 }}
                   >
                     {submitResult.accepted ? (
                       <div>
-                        <div className="flex items-center space-x-3 mb-6">
-                          <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                            <Trophy className="w-6 h-6 text-white" />
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#00ff88' }}>
+                            <Trophy className="w-6 h-6" style={{ color: '#0a0a0f' }} />
                           </div>
                           <div>
-                            <h4 className="text-2xl font-bold text-green-400">Accepted</h4>
-                            <p className="text-green-300">Congratulations! Your solution is correct.</p>
+                            <h4 className="text-2xl font-bold" style={{ color: '#00ff88' }}>Accepted</h4>
+                            <p style={{ color: '#b0b0b0' }}>Congratulations! Your solution is correct.</p>
                           </div>
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="bg-gray-800/50 p-4 rounded-lg">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <CheckCircle className="w-5 h-5 text-green-400" />
-                              <span className="text-gray-400 text-sm">Test Cases</span>
+                          <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(10, 10, 15, 0.6)' }}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <CheckCircle className="w-5 h-5" style={{ color: '#00ff88' }} />
+                              <span className="text-sm" style={{ color: '#808080' }}>Test Cases</span>
                             </div>
-                            <p className="text-green-300 text-xl font-bold">
+                            <p className="text-xl font-bold" style={{ color: '#00ff88' }}>
                               {submitResult.passedTestCases}/{submitResult.totalTestCases}
                             </p>
                           </div>
                           
-                          <div className="bg-gray-800/50 p-4 rounded-lg">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <Clock className="w-5 h-5 text-blue-400" />
-                              <span className="text-gray-400 text-sm">Runtime</span>
+                          <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(10, 10, 15, 0.6)' }}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <Clock className="w-5 h-5" style={{ color: '#00ff88' }} />
+                              <span className="text-sm" style={{ color: '#808080' }}>Runtime</span>
                             </div>
-                            <p className="text-blue-300 text-xl font-bold">{submitResult.runtime + " sec"}</p>
+                            <p className="text-xl font-bold" style={{ color: '#00ff88' }}>{submitResult.runtime + " sec"}</p>
                           </div>
                           
-                          <div className="bg-gray-800/50 p-4 rounded-lg">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <Zap className="w-5 h-5 text-purple-400" />
-                              <span className="text-gray-400 text-sm">Memory</span>
+                          <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(10, 10, 15, 0.6)' }}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <Zap className="w-5 h-5" style={{ color: '#00ff88' }} />
+                              <span className="text-sm" style={{ color: '#808080' }}>Memory</span>
                             </div>
-                            <p className="text-purple-300 text-xl font-bold">{submitResult.memory + "KB"}</p>
+                            <p className="text-xl font-bold" style={{ color: '#00ff88' }}>{submitResult.memory + "KB"}</p>
                           </div>
                         </div>
                       </div>
                     ) : (
                       <div>
-                        <div className="flex items-center space-x-3 mb-6">
-                          <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
-                            <XCircle className="w-6 h-6 text-white" />
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#ef4444' }}>
+                            <XCircle className="w-6 h-6" style={{ color: '#ffffff' }} />
                           </div>
                           <div>
-                            <h4 className="text-2xl font-bold text-red-400">{submitResult.error}</h4>
-                            <p className="text-red-300">Your solution needs improvement.</p>
+                            <h4 className="text-2xl font-bold" style={{ color: '#ef4444' }}>{submitResult.error}</h4>
+                            <p style={{ color: '#b0b0b0' }}>Your solution needs improvement.</p>
                           </div>
                         </div>
                         
-                        <div className="bg-gray-800/50 p-4 rounded-lg">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <XCircle className="w-5 h-5 text-red-400" />
-                            <span className="text-gray-400 text-sm">Test Cases Passed</span>
+                        <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(10, 10, 15, 0.6)' }}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <XCircle className="w-5 h-5" style={{ color: '#ef4444' }} />
+                            <span className="text-sm" style={{ color: '#808080' }}>Test Cases Passed</span>
                           </div>
-                          <p className="text-red-300 text-xl font-bold">
+                          <p className="text-xl font-bold" style={{ color: '#ef4444' }}>
                             {submitResult.passedTestCases}/{submitResult.totalTestCases}
                           </p>
                         </div>
@@ -844,9 +1152,9 @@ const ProblemPage = () => {
                   </motion.div>
                 ) : (
                   <div className="text-center py-12">
-                    <Send className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                    <p className="text-gray-400 text-lg">Click "Submit" to submit your solution</p>
-                    <p className="text-gray-500 text-sm">Your code will be evaluated against all test cases</p>
+                    <Send className="w-16 h-16 mx-auto mb-4" style={{ color: '#606060' }} />
+                    <p className="text-lg" style={{ color: '#808080' }}>Click "Submit" to submit your solution</p>
+                    <p className="text-sm" style={{ color: '#606060' }}>Your code will be evaluated against all test cases</p>
                   </div>
                 )}
               </motion.div>

@@ -90,16 +90,16 @@ const UserProfile = () => {
       case 'easy': return 'text-green-400';
       case 'medium': return 'text-yellow-400';
       case 'hard': return 'text-red-400';
-      default: return 'text-gray-400';
+      default: return '';
     }
   };
 
   const getDifficultyBg = (difficulty) => {
     switch (difficulty) {
-      case 'easy': return 'bg-green-500/20 border-green-500/50';
-      case 'medium': return 'bg-yellow-500/20 border-yellow-500/50';
-      case 'hard': return 'bg-red-500/20 border-red-500/50';
-      default: return 'bg-gray-500/20 border-gray-500/50';
+      case 'easy': return 'bg-green-500/10 border-green-500/30';
+      case 'medium': return 'bg-yellow-500/10 border-yellow-500/30';
+      case 'hard': return 'bg-red-500/10 border-red-500/30';
+      default: return 'bg-gray-500/10 border-gray-500/30';
     }
   };
 
@@ -121,23 +121,41 @@ const UserProfile = () => {
   };
 
   const getContributionIntensity = (count) => {
-    if (count === 0) return 'bg-gray-800 border-gray-700';
-    if (count <= 2) return 'bg-green-800 border-green-700';
-    if (count <= 5) return 'bg-green-600 border-green-500';
-    if (count <= 10) return 'bg-green-500 border-green-400';
-    return 'bg-green-400 border-green-300';
+    if (count === 0) return 'border';
+    if (count <= 2) return '';
+    if (count <= 5) return '';
+    if (count <= 10) return '';
+    return '';
+  };
+
+  const getContributionStyle = (count) => {
+    if (count === 0) return { backgroundColor: 'rgba(0, 255, 136, 0.05)', border: '1px solid rgba(0, 255, 136, 0.1)' };
+    if (count <= 2) return { backgroundColor: 'rgba(0, 255, 136, 0.3)', border: '1px solid rgba(0, 255, 136, 0.4)' };
+    if (count <= 5) return { backgroundColor: 'rgba(0, 255, 136, 0.5)', border: '1px solid rgba(0, 255, 136, 0.6)' };
+    if (count <= 10) return { backgroundColor: 'rgba(0, 255, 136, 0.7)', border: '1px solid rgba(0, 255, 136, 0.8)' };
+    return { backgroundColor: '#00ff88', border: '1px solid #00ff88' };
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 flex justify-center items-center">
+      <div 
+        className="min-h-screen flex justify-center items-center"
+        style={{
+          fontFamily: "'IBM Plex Mono', 'Fira Code', monospace",
+          backgroundColor: '#0a0a0f',
+        }}
+      >
         <div className="flex flex-col items-center space-y-4">
           <motion.div
-            className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full"
+            className="w-12 h-12 rounded-full"
+            style={{
+              border: '4px solid rgba(0, 255, 136, 0.3)',
+              borderTopColor: '#00ff88',
+            }}
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
-          <p className="text-gray-300 text-lg">Loading profile...</p>
+          <p className="text-lg" style={{ color: '#e0e0e0' }}>Loading profile...</p>
         </div>
       </div>
     );
@@ -145,25 +163,47 @@ const UserProfile = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 flex justify-center items-center">
-        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-8 max-w-md">
-          <div className="flex items-center space-x-3 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div 
+        className="min-h-screen flex justify-center items-center"
+        style={{
+          fontFamily: "'IBM Plex Mono', 'Fira Code', monospace",
+          backgroundColor: '#0a0a0f',
+        }}
+      >
+        <div 
+          className="rounded-lg p-8 max-w-md"
+          style={{
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+          }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 flex-shrink-0" style={{ color: '#ef4444' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <h3 className="text-lg font-semibold text-red-300">Profile Load Error</h3>
+            <h3 className="text-lg font-semibold" style={{ color: '#ef4444' }}>Profile Load Error</h3>
           </div>
-          <p className="text-red-200 mb-4">{error}</p>
-          <div className="flex space-x-3">
+          <p className="mb-4" style={{ color: '#ff8080' }}>{error}</p>
+          <div className="flex gap-3">
             <button 
               onClick={fetchUserProfile}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+              className="px-4 py-2 rounded transition-colors"
+              style={{
+                backgroundColor: '#00ff88',
+                color: '#0a0a0f',
+                fontWeight: '600',
+              }}
             >
               Retry
             </button>
             <button 
               onClick={() => navigate('/home')}
-              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
+              className="px-4 py-2 rounded transition-colors"
+              style={{
+                backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                color: '#00ff88',
+                border: '1px solid rgba(0, 255, 136, 0.3)',
+              }}
             >
               Back to Dashboard
             </button>
@@ -175,8 +215,14 @@ const UserProfile = () => {
 
   if (!profileData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 flex justify-center items-center">
-        <p className="text-red-400 text-lg">Error loading profile data</p>
+      <div 
+        className="min-h-screen flex justify-center items-center"
+        style={{
+          fontFamily: "'IBM Plex Mono', 'Fira Code', monospace",
+          backgroundColor: '#0a0a0f',
+        }}
+      >
+        <p className="text-lg" style={{ color: '#ef4444' }}>Error loading profile data</p>
       </div>
     );
   }
@@ -184,65 +230,133 @@ const UserProfile = () => {
   const weeks = generateContributionGraph(profileData.contributionData);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900"><motion.header 
-        className="bg-gray-800/80 backdrop-blur-lg shadow-lg border-b border-gray-700/50 sticky top-0 z-50"
+    <div 
+      className="min-h-screen text-[#e0e0e0]"
+      style={{
+        fontFamily: "'IBM Plex Mono', 'Fira Code', monospace",
+        backgroundColor: '#0a0a0f',
+      }}
+    >
+      {/* Animated grid background */}
+      <div 
+        className="fixed inset-0"
+        style={{
+          opacity: 0.03,
+          backgroundImage: `
+            linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px',
+        }}
+      />
+
+      {/* Scanline effect */}
+      <div 
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          zIndex: 50,
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px)',
+        }}
+      />
+
+      <motion.header 
+        className="sticky top-0 px-8 py-6"
+        style={{ 
+          zIndex: 40,
+          backgroundColor: 'rgba(10, 10, 15, 0.8)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(0, 255, 136, 0.1)',
+        }}
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <motion.button
-                onClick={() => navigate('/home')}
-                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ArrowLeft className="w-5 h-5" />
-                <span>Back to Dashboard</span>
-              </motion.button>
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <motion.button
+            onClick={() => navigate('/home')}
+            className="flex items-center gap-2 transition-all"
+            style={{ color: '#808080' }}
+            whileHover={{ scale: 1.05, color: '#00ff88' }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Dashboard</span>
+          </motion.button>
+          
+          <div className="flex items-center gap-3">
+            <div 
+              className="w-8 h-8 rounded-xl flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(135deg, #00ff88 0%, #00cc70 100%)',
+              }}
+            >
+              <User className="w-5 h-5" style={{ color: '#0a0a0f' }} />
             </div>
-            
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <User className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Profile
-              </span>
-            </div>
+            <span 
+              className="text-xl font-bold"
+              style={{ 
+                fontFamily: "'Orbitron', sans-serif",
+                color: '#e0e0e0',
+              }}
+            >
+              PROFILE
+            </span>
           </div>
         </div>
       </motion.header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8"><motion.div 
+      <div className="max-w-7xl mx-auto px-6 py-8" style={{ position: 'relative', zIndex: 10 }}>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
+          <motion.div 
             className="lg:col-span-1"
             initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 border border-gray-700/50 shadow-xl"><div className="text-center mb-6">
-                <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <User className="w-12 h-12 text-white" />
+            <div 
+              className="rounded-2xl p-6 shadow-xl"
+              style={{
+                backgroundColor: 'rgba(10, 10, 15, 0.8)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(0, 255, 136, 0.2)',
+              }}
+            >
+
+              <div className="text-center mb-6">
+                <div 
+                  className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4"
+                  style={{
+                    background: 'linear-gradient(135deg, #00ff88 0%, #00cc70 100%)',
+                  }}
+                >
+                  <User className="w-12 h-12" style={{ color: '#0a0a0f' }} />
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-1">
+                <h2 className="text-2xl font-bold mb-1" style={{ color: '#e0e0e0' }}>
                   {profileData.user.firstName} {profileData.user.lastName}
                 </h2>
-                <p className="text-gray-400 mb-2">@{profileData.user.username}</p>
-                <div className="flex items-center justify-center text-gray-400 text-sm mb-4">
-                  <span className="bg-gray-700 px-2 py-1 rounded-full">
+                <p className="mb-2" style={{ color: '#808080' }}>@{profileData.user.username}</p>
+                <div className="flex items-center justify-center text-sm mb-4">
+                  <span 
+                    className="px-2 py-1 rounded-full"
+                    style={{
+                      backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                      color: '#00ff88',
+                    }}
+                  >
                     Rank #{Math.floor(Math.random() * 100000) + 50000}
                   </span>
                 </div>
-              </div><div className="mb-6">
+              </div>
+
+<div className="mb-6">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-white">About</h3>
+                  <h3 className="text-lg font-semibold" style={{ color: '#e0e0e0' }}>About</h3>
                   <motion.button
                     onClick={() => setEditMode(!editMode)}
-                    className="p-1 text-gray-400 hover:text-white transition-colors"
-                    whileHover={{ scale: 1.1 }}
+                    className="p-1 transition-colors"
+                    style={{ color: '#808080' }}
+                    whileHover={{ scale: 1.1, color: '#00ff88' }}
                     whileTap={{ scale: 0.9 }}
                   >
                     <Edit3 className="w-4 h-4" />
@@ -255,7 +369,12 @@ const UserProfile = () => {
                       value={editForm.bio}
                       onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                       placeholder="Tell us about yourself..."
-                      className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      className="w-full p-3 rounded-lg outline-none transition-all"
+                      style={{
+                        backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                        border: '1px solid rgba(0, 255, 136, 0.2)',
+                        color: '#e0e0e0',
+                      }}
                       rows="3"
                     />
                     <input
@@ -263,33 +382,57 @@ const UserProfile = () => {
                       value={editForm.location}
                       onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
                       placeholder="Location"
-                      className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      className="w-full p-3 rounded-lg outline-none transition-all"
+                      style={{
+                        backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                        border: '1px solid rgba(0, 255, 136, 0.2)',
+                        color: '#e0e0e0',
+                      }}
                     />
                     <input
                       type="text"
                       value={editForm.username}
                       onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
                       placeholder="Username"
-                      className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      className="w-full p-3 rounded-lg outline-none transition-all"
+                      style={{
+                        backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                        border: '1px solid rgba(0, 255, 136, 0.2)',
+                        color: '#e0e0e0',
+                      }}
                     />
                     <input
                       type="text"
                       value={editForm.linkedinProfile}
                       onChange={(e) => setEditForm({ ...editForm, linkedinProfile: e.target.value })}
                       placeholder="LinkedIn Profile"
-                      className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      className="w-full p-3 rounded-lg outline-none transition-all"
+                      style={{
+                        backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                        border: '1px solid rgba(0, 255, 136, 0.2)',
+                        color: '#e0e0e0',
+                      }}
                     />
                     <input
                       type="text"
                       value={editForm.githubProfile}
                       onChange={(e) => setEditForm({ ...editForm, githubProfile: e.target.value })}
                       placeholder="GitHub Profile"
-                      className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      className="w-full p-3 rounded-lg outline-none transition-all"
+                      style={{
+                        backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                        border: '1px solid rgba(0, 255, 136, 0.2)',
+                        color: '#e0e0e0',
+                      }}
                     />
                     <div className="flex gap-2">
                       <motion.button
                         onClick={handleEditProfile}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
+                        className="flex-1 py-2 px-4 rounded-lg transition-colors font-medium"
+                        style={{
+                          backgroundColor: '#00ff88',
+                          color: '#0a0a0f',
+                        }}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
@@ -297,7 +440,12 @@ const UserProfile = () => {
                       </motion.button>
                       <motion.button
                         onClick={() => setEditMode(false)}
-                        className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition-colors"
+                        className="flex-1 py-2 px-4 rounded-lg transition-colors"
+                        style={{
+                          backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                          color: '#00ff88',
+                          border: '1px solid rgba(0, 255, 136, 0.3)',
+                        }}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
@@ -307,11 +455,11 @@ const UserProfile = () => {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <p className="text-gray-300 text-sm">
+                    <p className="text-sm" style={{ color: '#b0b0b0' }}>
                       {profileData.user.bio || "No bio added yet."}
                     </p>
                     {profileData.user.location && (
-                      <div className="flex items-center text-gray-400 text-sm">
+                      <div className="flex items-center text-sm" style={{ color: '#808080' }}>
                         <MapPin className="w-4 h-4 mr-2" />
                         {profileData.user.location}
                       </div>
@@ -322,8 +470,9 @@ const UserProfile = () => {
                           href={profileData.user.githubProfile}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-gray-400 hover:text-white transition-colors"
-                          whileHover={{ scale: 1.1 }}
+                          className="transition-colors"
+                          style={{ color: '#808080' }}
+                          whileHover={{ scale: 1.1, color: '#00ff88' }}
                         >
                           <Github className="w-5 h-5" />
                         </motion.a>
@@ -333,8 +482,9 @@ const UserProfile = () => {
                           href={profileData.user.linkedinProfile}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-gray-400 hover:text-white transition-colors"
-                          whileHover={{ scale: 1.1 }}
+                          className="transition-colors"
+                          style={{ color: '#808080' }}
+                          whileHover={{ scale: 1.1, color: '#00ff88' }}
                         >
                           <Linkedin className="w-5 h-5" />
                         </motion.a>
@@ -354,22 +504,33 @@ const UserProfile = () => {
                 </div>
               </div><div className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Acceptance Rate</span>
-                  <span className="text-green-400 font-semibold">{profileData.stats.acceptanceRate}%</span>
+                  <span style={{ color: '#808080' }}>Acceptance Rate</span>
+                  <span className="font-semibold" style={{ color: '#00ff88' }}>{profileData.stats.acceptanceRate}%</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Total Submissions</span>
-                  <span className="text-white font-semibold">{profileData.stats.totalSubmissions}</span>
+                  <span style={{ color: '#808080' }}>Total Submissions</span>
+                  <span className="font-semibold" style={{ color: '#e0e0e0' }}>{profileData.stats.totalSubmissions}</span>
                 </div>
               </div>
             </div>
-          </motion.div><motion.div 
+          </motion.div>
+
+          <motion.div 
             className="lg:col-span-3"
             initial={{ x: 50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-          ><div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"><motion.div
-                className="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 border border-gray-700/50 shadow-xl"
+          >
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+              <motion.div
+                className="rounded-2xl p-6 shadow-xl"
+                style={{
+                  backgroundColor: 'rgba(10, 10, 15, 0.8)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(0, 255, 136, 0.2)',
+                }}
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300, damping: 15 }}
               >
@@ -381,7 +542,7 @@ const UserProfile = () => {
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2"
-                        className="text-gray-700"
+                        style={{ color: 'rgba(0, 255, 136, 0.2)' }}
                       />
                       <path
                         d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831"
@@ -389,21 +550,23 @@ const UserProfile = () => {
                         stroke="currentColor"
                         strokeWidth="2"
                         strokeDasharray={`${(profileData.stats.problemsSolved / profileData.stats.totalProblems) * 100}, 100`}
-                        className="text-blue-500"
+                        style={{ color: '#00ff88' }}
                       />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xl font-bold text-white">
+                      <span className="text-xl font-bold" style={{ color: '#e0e0e0' }}>
                         {profileData.stats.problemsSolved}/{profileData.stats.totalProblems}
                       </span>
                     </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Problems Solved</h3>
-                  <p className="text-gray-400 text-sm">
+                  <h3 className="text-lg font-semibold mb-2" style={{ color: '#e0e0e0' }}>Problems Solved</h3>
+                  <p className="text-sm" style={{ color: '#808080' }}>
                     {((profileData.stats.problemsSolved / profileData.stats.totalProblems) * 100).toFixed(1)}% Complete
                   </p>
                 </div>
-              </motion.div><motion.div
+              </motion.div>
+
+<motion.div
                 className="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 border border-gray-700/50 shadow-xl"
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300, damping: 15 }}
@@ -430,14 +593,19 @@ const UserProfile = () => {
                   </div>
                 </div>
               </motion.div><motion.div
-                className="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 border border-gray-700/50 shadow-xl"
+                className="rounded-2xl p-6 shadow-xl"
+                style={{
+                  backgroundColor: 'rgba(10, 10, 15, 0.8)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(0, 255, 136, 0.2)',
+                }}
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300, damping: 15 }}
               >
-                <h3 className="text-lg font-semibold text-white mb-4">Rating Trend</h3>
+                <h3 className="text-lg font-semibold mb-4" style={{ color: '#e0e0e0' }}>Rating Trend</h3>
                 <div className="h-24 flex items-center justify-center">
                   <div className="text-center">
-                    <TrendingUp className="w-8 h-8 text-orange-400 mx-auto mb-2" />
+                    <TrendingUp className="w-8 h-8 mx-auto mb-2" style={{ color: '#00ff88' }} />
                     <p className="text-gray-400 text-sm">Rating graph coming soon</p>
                   </div>
                 </div>
@@ -460,7 +628,8 @@ const UserProfile = () => {
                       {week.map((day, dayIndex) => (
                         <motion.div
                           key={`${weekIndex}-${dayIndex}`}
-                          className={`w-3 h-3 rounded-sm border ${getContributionIntensity(day.count)}`}
+                          className="w-3 h-3 rounded-sm"
+                          style={getContributionStyle(day.count)}
                           whileHover={{ scale: 1.3 }}
                           title={`${day.date}: ${day.count} submissions`}
                         />
@@ -470,29 +639,37 @@ const UserProfile = () => {
                 </div>
               </div>
               
-              <div className="flex items-center justify-between mt-4 text-xs text-gray-400">
+              <div className="flex items-center justify-between mt-4 text-xs" style={{ color: '#808080' }}>
                 <span>Less</span>
                 <div className="flex gap-1">
-                  <div className="w-3 h-3 rounded-sm bg-gray-800 border border-gray-700"></div>
-                  <div className="w-3 h-3 rounded-sm bg-green-800 border border-green-700"></div>
-                  <div className="w-3 h-3 rounded-sm bg-green-600 border border-green-500"></div>
-                  <div className="w-3 h-3 rounded-sm bg-green-500 border border-green-400"></div>
-                  <div className="w-3 h-3 rounded-sm bg-green-400 border border-green-300"></div>
+                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.2)' }}></div>
+                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'rgba(0, 255, 136, 0.3)', border: '1px solid rgba(0, 255, 136, 0.4)' }}></div>
+                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'rgba(0, 255, 136, 0.5)', border: '1px solid rgba(0, 255, 136, 0.6)' }}></div>
+                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'rgba(0, 255, 136, 0.7)', border: '1px solid rgba(0, 255, 136, 0.8)' }}></div>
+                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#00ff88', border: '1px solid #00ff88' }}></div>
                 </div>
                 <span>More</span>
               </div>
-            </motion.div><motion.div
-              className="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 border border-gray-700/50 shadow-xl"
+            </motion.div>
+
+<motion.div
+              className="rounded-2xl p-6 shadow-xl"
+              style={{
+                backgroundColor: 'rgba(10, 10, 15, 0.8)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(0, 255, 136, 0.2)',
+              }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
             >
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-white">Recent Submissions</h3>
+                <h3 className="text-lg font-semibold" style={{ color: '#e0e0e0' }}>Recent Submissions</h3>
                 <motion.button
                   onClick={() => navigate('/home')}
-                  className="text-blue-400 hover:text-blue-300 text-sm transition-colors"
-                  whileHover={{ scale: 1.05 }}
+                  className="text-sm transition-colors"
+                  style={{ color: '#00ff88' }}
+                  whileHover={{ scale: 1.05, color: '#00cc70' }}
                 >
                   View all submissions →
                 </motion.button>
@@ -501,37 +678,41 @@ const UserProfile = () => {
               <div className="space-y-4">
                 {profileData.recentSubmissions.length === 0 ? (
                   <div className="text-center py-8">
-                    <Code className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                    <p className="text-gray-400">No recent submissions found</p>
-                    <p className="text-gray-500 text-sm">Start solving problems to see your progress here!</p>
+                    <Code className="w-12 h-12 mx-auto mb-4" style={{ color: '#606060' }} />
+                    <p style={{ color: '#808080' }}>No recent submissions found</p>
+                    <p className="text-sm" style={{ color: '#606060' }}>Start solving problems to see your progress here!</p>
                   </div>
                 ) : (
                   profileData.recentSubmissions.map((submission, index) => (
                     <motion.div
                       key={submission.problemId}
-                      className="flex items-center justify-between p-4 bg-gray-700/50 rounded-lg border border-gray-600/50"
+                      className="flex items-center justify-between p-4 rounded-lg"
+                      style={{
+                        backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                        border: '1px solid rgba(0, 255, 136, 0.2)',
+                      }}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                       whileHover={{ scale: 1.01 }}
                     >
-                      <div className="flex items-center space-x-4">
-                        <CheckCircle className="w-5 h-5 text-green-400" />
+                      <div className="flex items-center gap-4">
+                        <CheckCircle className="w-5 h-5" style={{ color: '#00ff88' }} />
                         <div>
-                          <h4 className="text-white font-medium">{submission.problemTitle}</h4>
-                          <div className="flex items-center space-x-2 mt-1">
+                          <h4 className="font-medium" style={{ color: '#e0e0e0' }}>{submission.problemTitle}</h4>
+                          <div className="flex items-center gap-2 mt-1">
                             <span className={`text-xs px-2 py-1 rounded border ${getDifficultyBg(submission.difficulty)} ${getDifficultyColor(submission.difficulty)}`}>
                               {submission.difficulty.charAt(0).toUpperCase() + submission.difficulty.slice(1)}
                             </span>
-                            <span className="text-xs text-gray-400">{submission.tags}</span>
+                            <span className="text-xs" style={{ color: '#808080' }}>{submission.tags}</span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm text-gray-400">
+                        <div className="text-sm" style={{ color: '#808080' }}>
                           {new Date(submission.submittedAt).toLocaleDateString()}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="text-xs mt-1" style={{ color: '#606060' }}>
                           {submission.language}
                         </div>
                       </div>

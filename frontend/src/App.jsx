@@ -3,7 +3,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import VerifyOTP from "./pages/VerifyOTP";
 import Homepage from "./pages/Homepage";
-import LandingPageFixed from "./pages/LandingPageFixed";
+import LandingPage from "./pages/LandingPage";
 import UserProfile from "./pages/UserProfile";
 import { useDispatch, useSelector } from 'react-redux';
 import { checkAuth } from "./authSlice";
@@ -63,7 +63,7 @@ function App(){
   return(
   <>
     <Routes>
-      <Route path="/" element={<LandingPageFixed />} />
+      <Route path="/" element={<LandingPage />} />
       <Route path="/home" element={isAuthenticated ?<Homepage></Homepage>:<Navigate to="/login" />}></Route>
       <Route path="/login" element={isAuthenticated?<Navigate to="/home" />:<Login></Login>}></Route>
       <Route path="/signup" element={isAuthenticated?<Navigate to="/home" />:<Signup></Signup>}></Route>

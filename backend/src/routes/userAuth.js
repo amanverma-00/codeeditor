@@ -2,6 +2,7 @@ const express = require('express');
 
 const authRouter =  express.Router();
 const {register, login, logout, adminRegister, deleteProfile, verifyOTP, resendOTP} = require('../controllers/userAuthent')
+const {getUserProfile, updateUserProfile, getUserStreak} = require('../controllers/userProfile');
 const userMiddleware = require("../middleware/userMiddleware");
 const adminMiddleware = require('../middleware/adminMiddleware');
 
@@ -15,6 +16,9 @@ authRouter.post('/login', login);
 // Protected Routes - Require authentication
 authRouter.post('/logout', userMiddleware, logout);
 authRouter.delete('/deleteProfile', userMiddleware, deleteProfile);
+authRouter.get('/profile', userMiddleware, getUserProfile);
+authRouter.put('/profile', userMiddleware, updateUserProfile);
+authRouter.get('/streak', userMiddleware, getUserStreak);
 
 // User verification endpoint
 authRouter.get('/check', userMiddleware, (req,res)=>{

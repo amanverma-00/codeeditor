@@ -36,11 +36,12 @@ const updateStreak = async (user) => {
 
     if (!user.streakData) {
         user.streakData = {
-            currentStreak: 0,
-            longestStreak: 0,
-            lastSubmissionDate: null,
-            streakDates: []
+            currentStreak: 1,
+            longestStreak: 1,
+            lastSubmissionDate: today,
+            streakDates: [today]
         };
+        return user.streakData;
     }
 
     const lastSubmission = user.streakData.lastSubmissionDate ? 
@@ -50,30 +51,44 @@ const updateStreak = async (user) => {
         lastSubmission.setHours(0, 0, 0, 0);
     }
 
+    const todayString = today.toISOString().split('T')[0];
+    const lastSubmissionString = lastSubmission ? lastSubmission.toISOString().split('T')[0] : null;
+
+    // Check if already solved a problem today
+    if (lastSubmissionString === todayString) {
+        // Already solved today, don't increment streak
+        return user.streakData;
+    }
+
     const daysDifference = lastSubmission ? 
         Math.floor((today - lastSubmission) / (1000 * 60 * 60 * 24)) : null;
 
-    if (!lastSubmission || daysDifference > 0) {
-        if (!lastSubmission || daysDifference === 1) {
-            
-            user.streakData.currentStreak = (user.streakData.currentStreak || 0) + 1;
-        } else if (daysDifference > 1) {
-            
-            user.streakData.currentStreak = 1;
-        }
+    // First problem ever or solved yesterday (consecutive day)
+    if (!lastSubmission || daysDifference === 1) {
+        user.streakData.currentStreak = (user.streakData.currentStreak || 0) + 1;
+    } 
+    // Streak broken (more than 1 day gap)
+    else if (daysDifference > 1) {
+        user.streakData.currentStreak = 1;
+    }
 
-        if (user.streakData.currentStreak > (user.streakData.longestStreak || 0)) {
-            user.streakData.longestStreak = user.streakData.currentStreak;
-        }
+    // Update longest streak if current is higher
+    if (user.streakData.currentStreak > (user.streakData.longestStreak || 0)) {
+        user.streakData.longestStreak = user.streakData.currentStreak;
+    }
 
-        user.streakData.lastSubmissionDate = today;
+    // Update last submission date
+    user.streakData.lastSubmissionDate = today;
 
-        const todayString = today.toISOString().split('T')[0];
-        if (!user.streakData.streakDates.some(date => 
-            new Date(date).toISOString().split('T')[0] === todayString
-        )) {
-            user.streakData.streakDates.push(today);
-        }
+    // Add to streak dates if not already present
+    if (!user.streakData.streakDates) {
+        user.streakData.streakDates = [];
+    }
+    
+    if (!user.streakData.streakDates.some(date => 
+        new Date(date).toISOString().split('T')[0] === todayString
+    )) {
+        user.streakData.streakDates.push(today);
     }
 
     return user.streakData;

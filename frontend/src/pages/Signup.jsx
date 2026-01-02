@@ -6,17 +6,22 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { registerUser } from '../authSlice';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, ArrowRight, Mail, Lock, User } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
 
 const signupSchema = z.object({
   firstName: z.string().min(3, "Minimum character should be 3"),
   emailId: z.string().email("Invalid Email"),
-  password: z.string().min(8, "Password is too weak")
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[@$!%*?&#]/, "Password must contain at least one special character")
 });
 
 function Signup() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, loading, error } = useSelector((state) => state.auth);
@@ -33,10 +38,20 @@ function Signup() {
     }
   }, [isAuthenticated, navigate]);
 
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePos({
+        x: e.clientX / window.innerWidth,
+        y: e.clientY / window.innerHeight,
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   const onSubmit = async (data) => {
     const result = await dispatch(registerUser(data));
     
-    // Check if registration was successful and requires verification
     if (result.type === 'auth/register/fulfilled' && result.payload?.requiresVerification) {
       navigate('/verify-otp', { 
         state: { 
@@ -45,245 +60,332 @@ function Signup() {
         } 
       });
     } else if (result.type === 'auth/register/fulfilled') {
-      // If already verified (shouldn't happen in normal flow), go to home
       navigate('/home');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white overflow-hidden relative flex items-center justify-center p-4"><div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -inset-[10px] opacity-30">
-          {[...Array(30)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute bg-white rounded-full"
-              style={{
-                width: Math.random() * 4 + 1,
-                height: Math.random() * 4 + 1,
-                left: Math.random() * 100 + '%',
-                top: Math.random() * 100 + '%',
-              }}
-              animate={{
-                y: [0, -30, 0],
-                opacity: [0, 1, 0],
-              }}
-              transition={{
-                duration: Math.random() * 3 + 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-              }}
-            />
-          ))}
-        </div>
-      </div><motion.div 
-        className="absolute top-6 left-6 z-10"
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8 }}
+    <div 
+      className="min-h-screen text-[#e0e0e0] overflow-hidden relative flex items-center justify-center p-4"
+      style={{
+        fontFamily: "'IBM Plex Mono', 'Fira Code', monospace",
+        backgroundColor: '#0a0a0f',
+      }}
+    >
+      {/* Animated grid background */}
+      <div 
+        className="fixed inset-0"
+        style={{
+          opacity: 0.03,
+          backgroundImage: `
+            linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px',
+          transform: `translate(${mousePos.x * 20}px, ${mousePos.y * 20}px)`,
+          transition: 'transform 0.3s ease-out',
+        }}
+      />
+
+      {/* Scanline effect */}
+      <div 
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          zIndex: 50,
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px)',
+        }}
+      />
+
+      {/* Glowing orb */}
+      <div 
+        className="fixed pointer-events-none"
+        style={{
+          width: '500px',
+          height: '500px',
+          zIndex: 0,
+          left: `${mousePos.x * 100}%`,
+          top: `${mousePos.y * 100}%`,
+          transform: 'translate(-50%, -50%)',
+          background: 'radial-gradient(circle, rgba(0, 255, 136, 0.08) 0%, transparent 70%)',
+          transition: 'left 0.5s ease-out, top 0.5s ease-out',
+        }}
+      />
+
+      {/* Navigation */}
+      <motion.nav 
+        className="fixed top-0 left-0 right-0 px-8 py-6"
+        style={{ zIndex: 40 }}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
       >
-        <motion.div 
-          className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent cursor-pointer"
-          whileHover={{ scale: 1.05 }}
-          onClick={() => navigate('/')}
-          onHoverStart={() => setIsHovering(true)}
-          onHoverEnd={() => setIsHovering(false)}
-        >
-          CodeOps
-        </motion.div>
-      </motion.div><motion.div 
-        className="relative z-10 w-full max-w-md"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-      >
-        <div className="p-8 rounded-2xl bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl"><motion.div 
-            className="text-center mb-8"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <motion.div 
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={() => navigate('/')}
+            whileHover={{ scale: 1.02 }}
           >
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent mb-2">
-              Join CodeOps
+            <div 
+              className="w-10 h-10 flex items-center justify-center"
+              style={{ border: '2px solid #00ff88' }}
+            >
+              <span className="font-bold text-lg" style={{ color: '#00ff88' }}>C</span>
+            </div>
+            <span className="text-xl font-bold tracking-wider">
+              CODE<span style={{ color: '#00ff88' }}>OPS</span>
+            </span>
+          </motion.div>
+        </div>
+      </motion.nav>
+
+      {/* Main Content */}
+      <div className="w-full max-w-md relative" style={{ zIndex: 10 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="p-8"
+          style={{
+            backgroundColor: 'rgba(10, 10, 15, 0.8)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(0, 255, 136, 0.2)',
+          }}
+        >
+          <div className="mb-8">
+            <h1 
+              className="text-3xl font-bold mb-2"
+              style={{ 
+                fontFamily: "'Orbitron', sans-serif",
+                color: '#e0e0e0',
+              }}
+            >
+              CREATE ACCOUNT
             </h1>
-            <p className="text-white/70">
-              Start your coding journey today
+            <p style={{ color: '#808080' }}>
+              Join the community of developers
             </p>
-          </motion.div>{error && (
+          </div>
+
+          {error && (
             <motion.div 
-              className="mb-6 p-4 rounded-lg bg-red-500/20 border border-red-500/30 text-red-200"
+              className="mb-6 p-4"
+              style={{
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                color: '#ef4444',
+              }}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              {error}
+              <div className="flex items-center gap-2">
+                <span>⚠</span>
+                <span>{error}</span>
+              </div>
             </motion.div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6"><motion.div
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
             >
-              <label className="block text-sm font-medium text-white/80 mb-2">
-                First Name
+              <label 
+                className="block text-sm mb-2 tracking-wider"
+                style={{ color: '#808080' }}
+              >
+                NAME
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-white/40" />
-                </div>
-                <motion.input
+                <User 
+                  className="absolute left-3 top-3.5 w-5 h-5" 
+                  style={{ color: '#808080' }}
+                />
+                <input
                   type="text"
-                  placeholder="John"
-                  className={`w-full pl-10 pr-4 py-3 bg-white/10 border ${
-                    errors.firstName ? 'border-red-400' : 'border-white/20'
-                  } rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all`}
+                  placeholder="Your name"
+                  className="w-full pl-11 pr-4 py-3 transition-all"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: `1px solid ${errors.firstName ? '#ef4444' : 'rgba(128, 128, 128, 0.3)'}`,
+                    color: '#e0e0e0',
+                  }}
                   {...register('firstName')}
-                  whileFocus={{ scale: 1.02 }}
-                  onFocus={() => setIsHovering(true)}
-                  onBlur={() => setIsHovering(false)}
+                  onFocus={(e) => e.target.style.borderColor = '#00ff88'}
+                  onBlur={(e) => e.target.style.borderColor = errors.firstName ? '#ef4444' : 'rgba(128, 128, 128, 0.3)'}
                 />
               </div>
               {errors.firstName && (
                 <motion.span 
-                  className="text-red-300 text-sm mt-1 block"
+                  className="text-xs mt-1 flex items-center gap-1"
+                  style={{ color: '#ef4444' }}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
                   {errors.firstName.message}
                 </motion.span>
               )}
-            </motion.div><motion.div
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
             >
-              <label className="block text-sm font-medium text-white/80 mb-2">
-                Email Address
+              <label 
+                className="block text-sm mb-2 tracking-wider"
+                style={{ color: '#808080' }}
+              >
+                EMAIL
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-white/40" />
-                </div>
-                <motion.input
+                <Mail 
+                  className="absolute left-3 top-3.5 w-5 h-5" 
+                  style={{ color: '#808080' }}
+                />
+                <input
                   type="email"
-                  placeholder="john@example.com"
-                  className={`w-full pl-10 pr-4 py-3 bg-white/10 border ${
-                    errors.emailId ? 'border-red-400' : 'border-white/20'
-                  } rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all`}
+                  placeholder="you@example.com"
+                  className="w-full pl-11 pr-4 py-3 transition-all"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: `1px solid ${errors.emailId ? '#ef4444' : 'rgba(128, 128, 128, 0.3)'}`,
+                    color: '#e0e0e0',
+                  }}
                   {...register('emailId')}
-                  whileFocus={{ scale: 1.02 }}
-                  onFocus={() => setIsHovering(true)}
-                  onBlur={() => setIsHovering(false)}
+                  onFocus={(e) => e.target.style.borderColor = '#00ff88'}
+                  onBlur={(e) => e.target.style.borderColor = errors.emailId ? '#ef4444' : 'rgba(128, 128, 128, 0.3)'}
                 />
               </div>
               {errors.emailId && (
                 <motion.span 
-                  className="text-red-300 text-sm mt-1 block"
+                  className="text-xs mt-1 flex items-center gap-1"
+                  style={{ color: '#ef4444' }}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
                   {errors.emailId.message}
                 </motion.span>
               )}
-            </motion.div><motion.div
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
             >
-              <label className="block text-sm font-medium text-white/80 mb-2">
-                Password
+              <label 
+                className="block text-sm mb-2 tracking-wider"
+                style={{ color: '#808080' }}
+              >
+                PASSWORD
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-white/40" />
-                </div>
-                <motion.input
+                <Lock 
+                  className="absolute left-3 top-3.5 w-5 h-5" 
+                  style={{ color: '#808080' }}
+                />
+                <input
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className={`w-full pl-10 pr-12 py-3 bg-white/10 border ${
-                    errors.password ? 'border-red-400' : 'border-white/20'
-                  } rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all`}
+                  className="w-full pl-11 pr-12 py-3 transition-all"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: `1px solid ${errors.password ? '#ef4444' : 'rgba(128, 128, 128, 0.3)'}`,
+                    color: '#e0e0e0',
+                  }}
                   {...register('password')}
-                  whileFocus={{ scale: 1.02 }}
-                  onFocus={() => setIsHovering(true)}
-                  onBlur={() => setIsHovering(false)}
+                  onFocus={(e) => e.target.style.borderColor = '#00ff88'}
+                  onBlur={(e) => e.target.style.borderColor = errors.password ? '#ef4444' : 'rgba(128, 128, 128, 0.3)'}
                 />
                 <motion.button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-white/40 hover:text-white/60 transition-colors"
+                  className="absolute right-3 top-3"
                   onClick={() => setShowPassword(!showPassword)}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onHoverStart={() => setIsHovering(true)}
-                  onHoverEnd={() => setIsHovering(false)}
+                  style={{ color: '#808080' }}
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </motion.button>
               </div>
               {errors.password && (
                 <motion.span 
-                  className="text-red-300 text-sm mt-1 block"
+                  className="text-xs mt-1 flex items-center gap-1"
+                  style={{ color: '#ef4444' }}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
                   {errors.password.message}
                 </motion.span>
               )}
-            </motion.div><motion.div
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
+              {!errors.password && (
+                <p className="text-xs mt-1" style={{ color: '#808080' }}>
+                  Must include uppercase, lowercase, number, and special character (@$!%*?&#)
+                </p>
+              )}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
             >
               <motion.button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 px-6 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg font-semibold text-white flex items-center justify-center gap-2 hover:shadow-2xl transition-all disabled:opacity-50"
-                whileHover={{ scale: loading ? 1 : 1.02, y: -2 }}
+                className="w-full py-3.5 font-bold tracking-wider transition-all disabled:opacity-50 relative overflow-hidden group"
+                style={{ 
+                  backgroundColor: '#00ff88',
+                  color: '#0a0a0f',
+                }}
+                whileHover={{ scale: loading ? 1 : 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onHoverStart={() => setIsHovering(true)}
-                onHoverEnd={() => setIsHovering(false)}
               >
-                {loading ? (
-                  <>
-                    <motion.div 
-                      className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    />
-                    Creating account...
-                  </>
-                ) : (
-                  <>
-                    Create Account
-                    <motion.div
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
+                <span className="relative flex items-center justify-center gap-2" style={{ zIndex: 10 }}>
+                  {loading ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-5 h-5 border-2 border-[#0a0a0f] border-t-transparent rounded-full"
+                      />
+                      CREATING ACCOUNT...
+                    </>
+                  ) : (
+                    <>
+                      CREATE ACCOUNT
                       <ArrowRight className="w-5 h-5" />
-                    </motion.div>
-                  </>
-                )}
+                    </>
+                  )}
+                </span>
+                <div 
+                  className="absolute inset-0 translate-x-full group-hover:translate-x-0 transition-transform duration-300" 
+                  style={{ backgroundColor: '#00cc6f' }}
+                />
               </motion.button>
             </motion.div>
-          </form><motion.div 
-            className="text-center mt-8"
+          </form>
+
+          <motion.div 
+            className="mt-8 pt-6 text-center"
+            style={{ borderTop: '1px solid rgba(128, 128, 128, 0.2)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.9 }}
+            transition={{ delay: 0.5 }}
           >
-            <p className="text-white/60">
+            <p style={{ color: '#808080' }}>
               Already have an account?{' '}
               <NavLink 
-                to="/login" 
-                className="text-purple-400 hover:text-purple-300 font-semibold transition-colors"
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
+                to="/login"
+                style={{ color: '#00ff88', fontWeight: 600 }}
+                className="hover:underline"
               >
-                Sign In
+                Sign in
               </NavLink>
             </p>
           </motion.div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }
